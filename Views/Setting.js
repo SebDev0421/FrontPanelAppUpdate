@@ -177,16 +177,6 @@ const Setting = (props) => {
                             Guardar Cambios
                         </Text>
                     </TouchableOpacity>
-                    <TouchableOpacity
-                     style={[styles.BtnsSetting,{backgroundColor:'#C23737'}]}
-                     onPress = {()=>{
-
-                     }}
-                    >
-                        <Text
-                         style={styles.TextBtns}
-                        >Eliminar cuenta</Text>
-                    </TouchableOpacity>
                     </View>
                 </View>
                 </View>

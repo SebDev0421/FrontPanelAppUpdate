@@ -38,7 +38,11 @@ import Entry from './Views/Entry';
 import TaskService from './Views/TaskService';
 import LoadingScreen from './Views/LoadingScreen';
 
+const abortController = new AbortController()
+
 LogBox.ignoreAllLogs(true)
+
+
 
 const App: () => React$Node = () => {
   let [taskService, setTaskService] = useState()
@@ -77,6 +81,8 @@ const App: () => React$Node = () => {
       setTaskService()
       setViewLogin(<Login/>)
     })
+    
+  abortController.abort()
   },[])
   return (
     <>

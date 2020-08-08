@@ -27,7 +27,7 @@ const APIRefreshTask = (find,process) => {
             'Content-Type': 'application/json'
         }
     }).then(res => res.json())
-      .then(res =>{ console.log(res)})
+      .then(res =>{console.log(res)})
       .catch(e => console.log(e))
 }
 

@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "39653918460",
+    "firebase_url": "https://frontpanelnotificatons.firebaseio.com",
+    "project_id": "frontpanelnotificatons",
+    "storage_bucket": "frontpanelnotificatons.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:39653918460:android:79ba3a946b73fa5c90b979",
+        "android_client_info": {
+          "package_name": "com.frontpanel"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "39653918460-p9lrrdeemkg71fabv6sl8iaautn82csl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDXVmphrgNZuhFZ4Kyy3SFqlauT0KkABME"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "39653918460-p9lrrdeemkg71fabv6sl8iaautn82csl.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

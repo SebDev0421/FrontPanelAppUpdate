@@ -6,8 +6,7 @@ import{
     View,
     Text,
     TextInput,
-    TouchableOpacity,
-    TouchableNativeFeedback
+    TouchableOpacity
 }from 'react-native';
 
 import APIdata from '../Src/APIdata'
@@ -86,7 +85,8 @@ const Register = ()=>{
               
               items = {[
                   {label:'Administrador',value:1},
-                  {label:'Operario',value:2}
+                  {label:'Operario',value:2},
+                  {label:'Gerente',value:3}
               ]}
 
               onValueChange = {(value)=>{

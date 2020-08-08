@@ -21,9 +21,34 @@ import BtnCloseOptions from '../Components/BtnCloseOptions';
 import EventEmmiter from 'react-native-eventemitter';
 import APIdata from '../Src/APIdata';
 import Socket from '../Src/SocketListener';
+import {Notifications} from 'react-native-notifications';
 
 var idReadParse
 
+
+Notifications.registerRemoteNotifications();
+
+Notifications.events().registerRemoteNotificationsRegistered((event: Registered) => {
+        // TODO: Send the token to my server so it could send back push notifications...
+        console.log("Device Token Received", event.deviceToken);
+});
+Notifications.events().registerRemoteNotificationsRegistrationFailed((event: RegistrationError) => {
+        console.error(event);
+});
+
+Notifications.events().registerNotificationReceivedBackground((notification: Notification, completion: (response: NotificationCompletion) => void) => {
+        console.log("Notification Received - Background", notification.payload);
+    
+        // Calling completion on iOS with `alert: true` will present the native iOS inApp notification.
+        completion({alert: true, sound: true, badge: false});
+});
+
+const NotificationLocal = (title,body)=>{
+    Notifications.postLocalNotification({
+      title:title,
+      body:body          
+    })
+}
 
 const TaskService = () => {
     let [createOrderView, setCreateOderView] = useState()
@@ -64,6 +89,7 @@ const TaskService = () => {
         Socket.on('onDatesNewOrder',(data)=>{
             console.log(data)
             //generate Notification
+            NotificationLocal('Se a creado una Orden','La orden '+data.numOrder+' a sido creada')
             readAPITask()
         })
 

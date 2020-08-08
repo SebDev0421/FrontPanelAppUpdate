@@ -18,7 +18,7 @@ import AboutUs from './AboutUs';
 import Terms from './Terms';
 
 import EventEmitter from 'react-native-eventemitter';
-
+import AdminUsers from './AdminUsers';
 
 const animation = new Animated.Value(Dimensions.get('window').width);
 let move = 0
@@ -48,13 +48,28 @@ const Menu = (props)=>{
     let [roll,setRoll] = useState('')
     let [initials,setInitials] = useState('')
     let [viewOpenMenu,setViewOpenMenu] = useState()
+    let [btnAdmin, setBtnAdmin] = useState()
     useEffect(()=>{
         move = 0
        swipeEffect()
        if(props.userCred.roll === '1'){
            setRoll('Administrador')
-       }else{
+           setBtnAdmin()
+       }else if(props.userCred.roll === '2'){
            setRoll('Operario')
+           setBtnAdmin()
+       }else{
+        setRoll('Gerente')
+        setBtnAdmin(<TouchableOpacity
+            onPress = {() => {
+                   setViewOpenMenu(<AdminUsers/>)
+            }}
+            style = {[styles.Item,{
+               borderBottomWidth:1,
+               borderBottomColor:'gray'}]}
+           >
+               <Text style={styles.TextItem}>Administrar</Text>
+           </TouchableOpacity>)
        }
        var name = props.userCred.name
        var lastName = props.userCred.lastName
@@ -109,6 +124,7 @@ const Menu = (props)=>{
                 </View>
                 <View style={styles.containerOptions}>
                     <View style = {styles.Options}>
+                        {btnAdmin}
                         <TouchableOpacity
                          onPress = {() => {
                                 setViewOpenMenu(<Setting
@@ -129,7 +145,6 @@ const Menu = (props)=>{
                          style = {[styles.Item,{
                             borderBottomWidth:1,
                             borderBottomColor:'gray'}]}
-
                         >
                             <Text style={styles.TextItem}>Acerca de nosotros</Text>
                         </TouchableOpacity>
