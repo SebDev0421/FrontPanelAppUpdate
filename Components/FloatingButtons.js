@@ -91,7 +91,6 @@ const BtnsSecondary = ()=>{
             </TouchableOpacity>
             </View>
             </Animated.View>
-
             <Animated.View
              style = {[{flexDirection:'row',alignItems:'center'},HistoryStyle]}
             >
@@ -122,8 +121,7 @@ const BtnsSecondary = ()=>{
             >
             <TouchableOpacity
              onPress={()=>{
-                 Socket.emit('onNewOrder','hola')
-                 console.log('press floating')
+                 EventEmmiter.emit('onOpenHistory',true)
              }}
             >
                 <Image source = {require('../Images/historia.png')} style = {{width:25,height:25}}/>  
@@ -146,24 +144,6 @@ const BtnsSecondary = ()=>{
              }}
             >
                 <Image source = {require('../Images/anadir.png')} style = {{width:25,height:25}}/>  
-            </TouchableOpacity>
-            </View>
-            </Animated.View>
-            <Animated.View
-             style = {[{flexDirection:'row',alignItems:'center'},pinStyle]}
-            >
-            <View style={styles.boxTextFloating}>
-                <Text style = {styles.TextFloating}>Notificaciones</Text>
-            </View>
-            <View
-             style = {styles.floatingBtnSecondary}
-            >
-            <TouchableOpacity
-             onPress={()=>{
-                 console.log('press floating')
-             }}
-            >
-                <Image source = {require('../Images/notificacion.png')} style = {{width:25,height:25}}/>  
             </TouchableOpacity>
             </View>
             </Animated.View>

@@ -17,6 +17,8 @@ import CardTask from '../Components/CardTask';
 import Header from './Header';
 import Menu from './Menu';
 import BtnCloseOptions from '../Components/BtnCloseOptions';
+import History from './History';
+
 
 import EventEmmiter from 'react-native-eventemitter';
 import APIdata from '../Src/APIdata';
@@ -57,6 +59,7 @@ const TaskService = () => {
     let [actuallyTasks, setActuallyTasks] = useState([])
     let [viewFloatingButton, setViewFloatingButton] = useState()
     let [btnCloseEdit, setBtnCloseEdit] = useState()
+    let [historyView,setHistoryView] = useState()
     useEffect(()=>{
         const readAPITask = ()=>{
             fetch(APIdata.URI+'/readTasks',{
@@ -79,7 +82,9 @@ const TaskService = () => {
             setUserCredentials(idReadParse)
             if(idReadParse.roll === '1'){
                 setViewFloatingButton(<FloatingButtons/>)
-            }else{
+            }else if (idReadParse.roll === '3'){
+                setViewFloatingButton(<FloatingButtons/>)
+            }else if (idReadParse.roll === '2'){
                 setViewFloatingButton()
             }
         }
@@ -139,6 +144,16 @@ const TaskService = () => {
                 orderData = {data}
             />)
         })
+
+        EventEmmiter.on('onCloseHistory',()=>{
+            setTimeout(()=>{
+                setHistoryView()
+            },500)
+        })
+
+        EventEmmiter.on('onOpenHistory',()=>{
+            setHistoryView(<History/>)
+        })
     },[])
        return(
            <View style = {styles.container}>
@@ -178,6 +193,7 @@ const TaskService = () => {
                 />
             </TouchableOpacity>
             {menuView}
+            {historyView}
             {btnCloseEdit}
             {createOrderView}
             
