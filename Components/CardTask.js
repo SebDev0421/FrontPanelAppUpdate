@@ -6,7 +6,8 @@ import{
     StyleSheet,
     Dimensions,
     TouchableOpacity,
-    Image
+    Image,
+    Alert
 }from 'react-native';
  
 import EventEmmiter from 'react-native-eventemitter';
@@ -42,6 +43,7 @@ const APIProcess = async (_id)=>{
     }).then(res => res.json())
       .then(res =>{
           if(res.status !== 73 ){
+              
               EventEmmiter.emit('onPushNewTask',res.status) 
           }
           
@@ -50,12 +52,10 @@ const APIProcess = async (_id)=>{
       
 }
 
-var modifyVector = []
+
+var AuxTasks = []
 const CheckBoxRender = (props) => {
     let [toogleMarker,setToogleMarker] = useState(parseInt(props.state))
-    useEffect(()=>{
-       modifyVector = AuxTasks
-    })
     return(
         <View
                  style = {{flexDirection:'row',alignItems:'center'}}
@@ -67,10 +67,10 @@ const CheckBoxRender = (props) => {
                      if(!toogleMarker === true){
                        sendMarker = 1    
                      }
-                     modifyVector[props.indexTask-1] = {name:props.Name,flag:sendMarker}
-                     
+                     console.log(AuxTasks)
+                     AuxTasks[props.indexTask-1] = {name:props.Name,flag:sendMarker}
                      setToogleMarker(!toogleMarker)
-                     APIRefreshTask(props.Order,modifyVector)
+                     APIRefreshTask(props.Order,AuxTasks)
                  }}
                  isChecked = {toogleMarker}
                 />
@@ -79,29 +79,45 @@ const CheckBoxRender = (props) => {
 }
 
 
+const APISendTaskHistory = (_id,numOrder)=>{
+    fetch(APIdata.URI+'/stateChange',{
+        method:'PUT',
+        body:JSON.stringify({_id:_id}),
+        headers:{
+            'Content-Type' : 'application/json'
+        }
+    })
+    .then(res => res.json())
+    .then(res => {
+        if(res.status === 38){
+            Socket.emit('onCompleteTask',{numOrder:numOrder})
+        }
+    })
+    .catch(e => console.log(e))
+}
 
 
 var index = 0
-var AuxTasks = []
+
+
 
 const ExpanCard = (props) =>{
     let [taskData, setTaskData] = useState([])
     let [taskPush,setTaskPush] = useState([])
     useEffect(()=>{
-        setTaskData(props.task)
         AuxTasks = []
         props.task.map((value)=>{
             AuxTasks.push(value[0])
         }) 
-        setTaskPush(AuxTasks)
-        index = 0
+       index = 0
+       setTaskData(AuxTasks)
+       console.log(props.task)
     },[])
     return(
         <View
          style={{width:'100%',alignItems:'center'}}
         >
-        <View
-        >
+        <View>
             <Text
              style = {styles.TitleProps}
             >Concepto</Text>
@@ -110,9 +126,8 @@ const ExpanCard = (props) =>{
         <Text
          style = {styles.TitleProps}
         >Procesos</Text>
-            {taskData.map((taskRead)=>{
+            {props.task.map((taskRead)=>{
                 index += 1
-            
                 return(
                  <CheckBoxRender
                   Name = {taskRead[0].name}
@@ -142,6 +157,23 @@ const ExpanCard = (props) =>{
         >
             <TouchableOpacity
              style={styles.btnFinishOrder}
+             onPress = {()=>{
+                 Alert.alert(
+                     "Terminar orden",
+                     "Desea terminar la orden",
+                     [{
+                         text:"Cancelar",
+                         style:"cancel"
+                     },
+                     {
+                         text:"Terminar",
+                         onPress:()=>{
+                             APISendTaskHistory(props.dataExpand._id,props.dataExpand.numOrder)
+                         }
+                     }
+                    ]
+                 )
+             }}
             >
                 <Text
                  style={styles.textBtn}
@@ -220,7 +252,7 @@ const CardTask = (props)=>{
 
         var dateyear =  dateNow.getFullYear().toString()
         var dateMonth =  (dateNow.getMonth()+1).toString()
-        var dateDay =  (dateNow.getMonth()).toString()
+        var dateDay =  (dateNow.getDate()).toString()
         if(parseInt(dateMonth)<10){
             dateMonth = '0'+dateMonth
         }
@@ -252,7 +284,10 @@ const CardTask = (props)=>{
         })
 
         EventEmmiter.on('onPushNewTask',(data)=>{
-            setTaskPass(data)
+            setExpandView(<ExpanCard
+                task = {data}
+                dataExpand = {props.dataTask}
+            />)
         })
     },[])
 
@@ -290,10 +325,6 @@ const CardTask = (props)=>{
                     setArrowChange(<Image source = {require('../Images/arrowup.png')} style={{width:30,height:30}}/>)
                     setBoolExpand(true)
                     APIProcess(props.dataTask._id)
-                    setExpandView(<ExpanCard
-                      task = {taskPass}
-                      dataExpand = {props.dataTask}
-                    />)
                 }
             }}
            >

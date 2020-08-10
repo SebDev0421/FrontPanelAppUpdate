@@ -101,12 +101,21 @@ const TaskService = () => {
         Socket.on('onDatesDeleteOrder',(data)=>{
             console.log(data)
             //generate Notification
+            NotificationLocal('Se a eliminado una orden una Orden','La orden '+data.numOrder+' a sido eliminada')
             readAPITask()
         })
 
         Socket.on('onDatesEditOrder',(data)=>{
             console.log(data)
             //generate Notification
+            NotificationLocal('Se a modificado una Orden','La orden '+data.numOrder+' a sido modificada')
+            readAPITask()
+        })
+
+        Socket.on('onDatesCompleteOrder',(data)=>{
+            console.log(data)
+            //generate Notification
+            NotificationLocal('Orden completada','La orden '+data.numOrder+' a sido entregada y finalizada')
             readAPITask()
         })
 
@@ -165,8 +174,8 @@ const TaskService = () => {
             {actuallyTasks.map((data)=>{
                 return(
                     <View
-                    style ={{width:'100%',alignItems:'center'}}
-                    key={data._id}
+                    style = {{width:'100%',alignItems:'center'}}
+                    key = {data._id}
                     >
                     <CardTask
                     dataTask = {data}

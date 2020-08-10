@@ -12,6 +12,9 @@ import{
 
 import EventEmitter from 'react-native-eventemitter';
 import CardHistory from '../Components/CardHistory';
+import APIdata from '../Src/APIdata';
+
+import {Notifications} from 'react-native-notifications';
 
 
 import Header from './Header';
@@ -32,10 +35,34 @@ const swipeEffect = () => {
 
 
 const History = ()=>{
+    let [dataHistory,setDataHistory] = useState([]);
     useEffect(()=>{
        move = 0
        swipeEffect()
-    })
+
+       const ReadAPIHistory = ()=>{
+           fetch(APIdata.URI+'/getHistory',{
+               method:'PUT',
+               headers:{
+                   'Content-Type' : 'application/json'
+               }
+           }).then(res => res.json())
+             .then(res => {
+                 setDataHistory(res)
+             })
+             .catch(e => console.log(e))
+       }
+
+       ReadAPIHistory()
+
+       EventEmitter.on('onDeleteHistoryOrder',()=>{
+           Notifications.postLocalNotification({
+               title:'Orden eliminada del historial',
+               body:'Has eliminado la orden'
+           })
+           ReadAPIHistory()
+       })
+    },[])
 
     return(
         <Animated.View
@@ -50,7 +77,18 @@ const History = ()=>{
                 <View
                  style = {styles.containerCard}
                 >
-                    <CardHistory/>
+                  {dataHistory.map((value)=>{
+                      return(
+                          <View
+                           key={value._id}
+                           style={{width:'100%',alignItems:'center'}}
+                          >
+                              <CardHistory
+                               dataCard = {value}
+                              />
+                          </View>
+                      )
+                  })}
                 </View>
             </ScrollView>
             <TouchableOpacity
