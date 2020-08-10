@@ -152,6 +152,7 @@ const CreateOrder = (props)=>{
                       setTasks(value)
                   }}
                   value={tasks}
+                  style={{width:'80%'}}
                   />
                   <TouchableOpacity
                    style={{position:'absolute',right:5}}

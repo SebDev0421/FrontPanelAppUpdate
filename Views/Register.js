@@ -84,9 +84,9 @@ const Register = ()=>{
              <RNPickerSelect
               
               items = {[
-                  {label:'Administrador',value:1},
+                  {label:'Ordenante',value:1},
                   {label:'Operario',value:2},
-                  {label:'Gerente',value:3}
+                  {label:'Gerencia',value:3}
               ]}
 
               onValueChange = {(value)=>{
@@ -170,8 +170,13 @@ const Register = ()=>{
                     alert('Falta campos por llenar')
                      
                  }else{
-                     if(comparePass)
-                     APIRegister(name,lastName,selectRoll,email,password);
+                     if(password.length > 5){
+                        if(comparePass)
+                        APIRegister(name,lastName,selectRoll,email,password);    
+                     }else{
+                         alert('La contrasena debe contener al menos 6 caracteres')
+                     }
+                     
                  }
             }}
             >

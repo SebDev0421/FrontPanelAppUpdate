@@ -18,7 +18,7 @@ import Header from './Header';
 import Menu from './Menu';
 import BtnCloseOptions from '../Components/BtnCloseOptions';
 import History from './History';
-
+import FloatingBtnOper from '../Components/FloatingBtnOper';
 
 import EventEmmiter from 'react-native-eventemitter';
 import APIdata from '../Src/APIdata';
@@ -52,6 +52,8 @@ const NotificationLocal = (title,body)=>{
     })
 }
 
+const abortController = new AbortController()
+
 const TaskService = () => {
     let [createOrderView, setCreateOderView] = useState()
     let [menuView, setMenuView] = useState()
@@ -61,6 +63,8 @@ const TaskService = () => {
     let [btnCloseEdit, setBtnCloseEdit] = useState()
     let [historyView,setHistoryView] = useState()
     useEffect(()=>{
+
+        abortController.abort()
         const readAPITask = ()=>{
             fetch(APIdata.URI+'/readTasks',{
                 method:'PUT',
@@ -85,7 +89,7 @@ const TaskService = () => {
             }else if (idReadParse.roll === '3'){
                 setViewFloatingButton(<FloatingButtons/>)
             }else if (idReadParse.roll === '2'){
-                setViewFloatingButton()
+                setViewFloatingButton(<FloatingBtnOper/>)
             }
         }
 
@@ -94,28 +98,28 @@ const TaskService = () => {
         Socket.on('onDatesNewOrder',(data)=>{
             console.log(data)
             //generate Notification
-            NotificationLocal('Se a creado una Orden','La orden '+data.numOrder+' a sido creada')
+            NotificationLocal('Se ha creado una Orden','La orden '+data.numOrder+' ha sido creada')
             readAPITask()
         })
 
         Socket.on('onDatesDeleteOrder',(data)=>{
             console.log(data)
             //generate Notification
-            NotificationLocal('Se a eliminado una orden una Orden','La orden '+data.numOrder+' a sido eliminada')
+            NotificationLocal('Se ha eliminado una orden','La orden '+data.numOrder+' ha sido eliminada')
             readAPITask()
         })
 
         Socket.on('onDatesEditOrder',(data)=>{
             console.log(data)
             //generate Notification
-            NotificationLocal('Se a modificado una Orden','La orden '+data.numOrder+' a sido modificada')
+            NotificationLocal('Se ha modificado una Orden','La orden '+data.numOrder+' ha sido modificada')
             readAPITask()
         })
 
         Socket.on('onDatesCompleteOrder',(data)=>{
             console.log(data)
             //generate Notification
-            NotificationLocal('Orden completada','La orden '+data.numOrder+' a sido entregada y finalizada')
+            NotificationLocal('Orden completada','La orden '+data.numOrder+' ha sido entregada y finalizada')
             readAPITask()
         })
 
@@ -187,6 +191,7 @@ const TaskService = () => {
             </View>
             </ScrollView>
             {viewFloatingButton}
+            
             <TouchableOpacity
              style={styles.btnMenu}
              onPress = {()=>{

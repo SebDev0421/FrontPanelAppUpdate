@@ -266,7 +266,7 @@ const EditOrder = (props)=>{
                      }
                  }}
                 >
-                    <Text style = {{color:'white', fontWeight:'bold'}}>Agregar orden</Text>
+                    <Text style = {{color:'white', fontWeight:'bold'}}>Editar orden</Text>
                 </TouchableOpacity>
             </View>
         </View>

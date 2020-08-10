@@ -14,7 +14,6 @@ import EventEmmiter from 'react-native-eventemitter';
 
 import APIdata from '../Src/APIdata';
 import Socket from '../Src/SocketListener';
-import BtnExpandCard from '../Components/BtnExpandCard';
 
 import CheckBox from 'react-native-check-box';
 
@@ -28,7 +27,9 @@ const APIRefreshTask = (find,process) => {
             'Content-Type': 'application/json'
         }
     }).then(res => res.json())
-      .then(res =>{console.log(res)})
+      .then(res =>{
+        return 0  
+        /* console.log(res) */})
       .catch(e => console.log(e))
 }
 
@@ -43,8 +44,8 @@ const APIProcess = async (_id)=>{
     }).then(res => res.json())
       .then(res =>{
           if(res.status !== 73 ){
-              
-              EventEmmiter.emit('onPushNewTask',res.status) 
+              //console.log('onPushNewTask'+_id)
+              EventEmmiter.emit('onPushNewTask'+_id,res.status) 
           }
           
       })
@@ -58,9 +59,16 @@ const CheckBoxRender = (props) => {
     let [toogleMarker,setToogleMarker] = useState(parseInt(props.state))
     return(
         <View
-                 style = {{flexDirection:'row',alignItems:'center'}}
-                >
-                <Text>{props.Name}</Text>
+                 style = {[{flexDirection:'row',alignItems:'center',justifyContent:'center',borderRadius:10,width:'80%',height:30,marginVertical:5},toogleMarker ? {backgroundColor:'#0564B3'} : {backgroundColor:'#000'}]}
+         >
+                <Text
+                 style={{
+                     color:'white',
+                     fontWeight:'bold',
+                     fontSize:16
+                 }
+                 }
+                >{props.Name}</Text>
                 <CheckBox
                  onClick={()=>{
                     var sendMarker = 0
@@ -73,6 +81,12 @@ const CheckBoxRender = (props) => {
                      APIRefreshTask(props.Order,AuxTasks)
                  }}
                  isChecked = {toogleMarker}
+                 style = {{
+                     position:'absolute',
+                     right:10
+                 }}
+
+                 checkBoxColor={'white'}
                 />
             </View>
     ) 
@@ -111,7 +125,7 @@ const ExpanCard = (props) =>{
         }) 
        index = 0
        setTaskData(AuxTasks)
-       console.log(props.task)
+       //(props.dateAlert)
     },[])
     return(
         <View
@@ -140,11 +154,19 @@ const ExpanCard = (props) =>{
                 
                 
             })}
-        <View>
+        <View
+         style = {{width:'100%',alignItems:'center'}}
+        >
             <Text
              style = {styles.TitleProps}
             >Fecha de entrega</Text>
-            <Text>{props.dataExpand.finishDate}</Text>
+            <View
+             style = {[{width:'85%',height:35,alignItems:'center',justifyContent:'center',borderRadius:10},props.dateAlert ? {backgroundColor:'#D31812'} : {backgroundColor:'#23D312'}]}
+            >
+            <Text
+             style = {{color:'white',fontWeight:'bold'}}
+            >{props.dataExpand.finishDate}</Text>
+            </View>
         </View>
         <View>
             <Text
@@ -204,6 +226,7 @@ const AlertDate = ()=>{
 }
 
 
+let colorDate
 
 
 const CardTask = (props)=>{
@@ -220,7 +243,7 @@ const CardTask = (props)=>{
                 <TouchableOpacity
                  style = {{position:'absolute',top:50,right:10}}
                  onPress = {()=>{
-                  console.log('send ',props.dataTask.numOrder)
+                  //console.log('send ',props.dataTask.numOrder)
                   fetch(APIdata.URI+'/deleteTasks',{
                     method:'PUT',
                     body:JSON.stringify({numOrder:props.dataTask.numOrder}),
@@ -240,7 +263,7 @@ const CardTask = (props)=>{
            </TouchableOpacity>
             )
         })
-
+        colorDate = false
         const dataFinish = props.dataTask.finishDate
         const concated = dataFinish.split('-')
         var concatDates = ''
@@ -260,10 +283,12 @@ const CardTask = (props)=>{
             dateDay = '0'+dateDay
         }
         const dateActually = dateyear + dateMonth + dateDay
-        //console.log(dateActually)
+        
         if(parseInt(dateActually)>parseInt(concatDates)){
+            colorDate = true
             setViewAlert(<AlertDate/>)
         }else{
+            colorDate = false
             setViewAlert()
         }
 
@@ -283,10 +308,27 @@ const CardTask = (props)=>{
             setBtnSecond()
         })
 
-        EventEmmiter.on('onPushNewTask',(data)=>{
+        EventEmmiter.on('onPushNewTask'+props.dataTask._id,(data)=>{
+        var dateyear =  dateNow.getFullYear().toString()
+        var dateMonth =  (dateNow.getMonth()+1).toString()
+        var dateDay =  (dateNow.getDate()).toString()
+        if(parseInt(dateMonth)<10){
+            dateMonth = '0'+dateMonth
+        }
+        if(parseInt(dateDay)<10){
+            dateDay = '0'+dateDay
+        }
+        const dateActually = dateyear + dateMonth + dateDay
+        
+        if(parseInt(dateActually)>parseInt(concatDates)){
+            colorDate = true
+        }else{
+            colorDate = false
+        }
             setExpandView(<ExpanCard
                 task = {data}
                 dataExpand = {props.dataTask}
+                dateAlert = {colorDate}
             />)
         })
     },[])

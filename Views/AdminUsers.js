@@ -11,7 +11,7 @@ import{
 import EventEmmiter from 'react-native-eventemitter';
 import Header from './Header';
 import APIdata from '../Src/APIdata';
-
+import Socket from '../Src/SocketListener';
 
 const APIDeleteUsr = (_id) =>{
     fetch(APIdata.URI+'/deleteUsersData',{
@@ -25,6 +25,7 @@ const APIDeleteUsr = (_id) =>{
         if(res.status === 22){
             alert('El usuario ha sido eliminado')
             EventEmmiter.emit('onUserDelete',true)
+            Socket.emit('onUserDelete/'+_id,true)
             return 0
         } 
       })

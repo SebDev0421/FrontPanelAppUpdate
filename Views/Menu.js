@@ -49,6 +49,7 @@ const Menu = (props)=>{
     let [initials,setInitials] = useState('')
     let [viewOpenMenu,setViewOpenMenu] = useState()
     let [btnAdmin, setBtnAdmin] = useState()
+    let [king,setKing] = useState()
     useEffect(()=>{
         move = 0
        swipeEffect()
@@ -60,6 +61,10 @@ const Menu = (props)=>{
            setBtnAdmin()
        }else{
         setRoll('Gerente')
+        setKing(<Image
+            source = {require('../Images/corona.png')}
+            style = {{width:40,height:40}}
+           />)
         setBtnAdmin(<TouchableOpacity
             onPress = {() => {
                    setViewOpenMenu(<AdminUsers/>)
@@ -118,7 +123,12 @@ const Menu = (props)=>{
                             <Text>{props.userCred.name} {props.userCred.lastName}</Text>
                             <Text>Front panel</Text>
                             <Text>{props.userCred.email}</Text>
+                            <View
+                             style = {{flexDirection:'row',alignItems:'center'}}
+                            >
                             <Text>{roll}</Text>
+                            {king}
+                            </View>
                         </View>
                     </View>
                 </View>
