@@ -25,7 +25,7 @@ const APIDeleteUsr = (_id) =>{
         if(res.status === 22){
             alert('El usuario ha sido eliminado')
             EventEmmiter.emit('onUserDelete',true)
-            Socket.emit('onUserDelete/'+_id,true)
+            Socket.emit('onUserDelete',_id)
             return 0
         } 
       })

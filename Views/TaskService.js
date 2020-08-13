@@ -19,6 +19,7 @@ import Menu from './Menu';
 import BtnCloseOptions from '../Components/BtnCloseOptions';
 import History from './History';
 import FloatingBtnOper from '../Components/FloatingBtnOper';
+import ListNotification from '../Components/ListNotification';
 
 import EventEmmiter from 'react-native-eventemitter';
 import APIdata from '../Src/APIdata';
@@ -30,9 +31,10 @@ var idReadParse
 
 Notifications.registerRemoteNotifications();
 
-Notifications.events().registerRemoteNotificationsRegistered((event: Registered) => {
+/* Notifications.events().registerRemoteNotificationsRegistered((event: Registered) => {
         // TODO: Send the token to my server so it could send back push notifications...
         console.log("Device Token Received", event.deviceToken);
+        Socket.emit('onNewTokenDevice', event.deviceToken)
 });
 Notifications.events().registerRemoteNotificationsRegistrationFailed((event: RegistrationError) => {
         console.error(event);
@@ -43,7 +45,7 @@ Notifications.events().registerNotificationReceivedBackground((notification: Not
     
         // Calling completion on iOS with `alert: true` will present the native iOS inApp notification.
         completion({alert: true, sound: true, badge: false});
-});
+}); */
 
 const NotificationLocal = (title,body)=>{
     Notifications.postLocalNotification({
@@ -54,6 +56,30 @@ const NotificationLocal = (title,body)=>{
 
 const abortController = new AbortController()
 
+const IndicatorTask = ()=>{
+    return(
+        <View
+                 style = {{
+                     position:'absolute',
+                     width:20,
+                     height:20,
+                     borderRadius:20/2,
+                     backgroundColor: 'red',
+                     bottom:-5,
+                     right:-5,
+                     justifyContent:'center',
+                     alignItems:'center'
+                 }}
+                >
+                    <Text
+                     style = {{
+                         color:'white'
+                     }}
+                    >2</Text>
+        </View>
+    )
+}
+
 const TaskService = () => {
     let [createOrderView, setCreateOderView] = useState()
     let [menuView, setMenuView] = useState()
@@ -62,8 +88,12 @@ const TaskService = () => {
     let [viewFloatingButton, setViewFloatingButton] = useState()
     let [btnCloseEdit, setBtnCloseEdit] = useState()
     let [historyView,setHistoryView] = useState()
+    let [sizeTasks, setSizeTasks] = useState(<IndicatorTask/>)
+    let [viewListNotifications, setViewListNotifiactions] = useState()
+    let [toogleList, setToogleList] = useState(false)
     useEffect(()=>{
 
+        
         abortController.abort()
         const readAPITask = ()=>{
             fetch(APIdata.URI+'/readTasks',{
@@ -79,6 +109,7 @@ const TaskService = () => {
               .catch(e=>console.log(e))
         }
         
+
         readAPITask()
         const readAsync = async()=>{
             const idRead = await AsyncStorage.getItem('credentialsAPPfront')
@@ -206,6 +237,25 @@ const TaskService = () => {
                  style = {{width:30,height:30}}
                 />
             </TouchableOpacity>
+            <TouchableOpacity
+             style = {styles.btnNotifications}
+             onPress = {()=>{
+                 if(toogleList){
+                    setViewListNotifiactions()
+                    setToogleList(false)
+                 }else{
+                    setViewListNotifiactions(<ListNotification/>)
+                    setToogleList(true)
+                 }
+             }}
+            >
+                <Image
+                 source = {require('../Images/notificacion.png')}
+                 style = {{width:30,height:30}}
+                />
+                {sizeTasks}
+            </TouchableOpacity>
+            {viewListNotifications}
             {menuView}
             {historyView}
             {btnCloseEdit}
@@ -234,6 +284,17 @@ const styles = StyleSheet.create({
         alignItems:'center',
         justifyContent:'center',
         left:10,
+        top:5
+    },
+    btnNotifications:{
+        width:45,
+        height:45,
+        borderRadius:45/2,
+        backgroundColor:'white',
+        position:'absolute',
+        alignItems:'center',
+        justifyContent:'center',
+        left:60,
         top:5
     }
 })

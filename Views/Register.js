@@ -13,7 +13,24 @@ import APIdata from '../Src/APIdata'
 
 import RNPickerSelect from 'react-native-picker-select';
 import EventEmitter from 'react-native-eventemitter';
+import * as Progress from 'react-native-progress';
 
+
+let verify = ''
+
+
+const Register = ()=>{
+    let [visibility1,setVisiblity1] = useState(true)
+    let [visibility2,setVisiblity2] = useState(true)
+    let [selectRoll, setSelectRoll] = useState(1)
+    let [name, setName ] = useState('')
+    let [lastName, setlastName ] = useState('')
+    let [email, setEmail] = useState('')
+    let [password,setPassword] = useState('')
+    let [comparePass, setComparePass] = useState(false)
+    let [chargerRound,setChargerRound] = useState()
+    
+    
 const APIRegister = (name,lastName,roll,email,password)=>{
     console.log(APIdata.URI+'/register')
     fetch(APIdata.URI+'/register',{
@@ -26,26 +43,21 @@ const APIRegister = (name,lastName,roll,email,password)=>{
       .then(res => {
           console.log(res)
           if( res.status == 200 ){
+              setChargerRound()
               alert('Tu cuenta esta en proceso de aceptacion')
               EventEmitter.emit('onCloseRegister',true)
           }else if( res.status == 100 ){
+            setChargerRound()
             alert('La cuenta ya existe')
           }
       })
-      .catch(err => {console.log(err)})
+      .catch(err => {
+        setChargerRound()
+        alert('Hubo un error')
+      })
 }
 
-let verify = ''
 
-const Register = ()=>{
-    let [visibility1,setVisiblity1] = useState(true)
-    let [visibility2,setVisiblity2] = useState(true)
-    let [selectRoll, setSelectRoll] = useState(1)
-    let [name, setName ] = useState('')
-    let [lastName, setlastName ] = useState('')
-    let [email, setEmail] = useState('')
-    let [password,setPassword] = useState('')
-    let [comparePass, setComparePass] = useState(false)
     return(
         <View style={styles.container}>
             <View style={styles.containerInputs}>
@@ -172,6 +184,7 @@ const Register = ()=>{
                  }else{
                      if(password.length > 5){
                         if(comparePass)
+                        setChargerRound(<Progress.CircleSnail color={['white']}/>)
                         APIRegister(name,lastName,selectRoll,email,password);    
                      }else{
                          alert('La contrasena debe contener al menos 6 caracteres')
@@ -183,6 +196,7 @@ const Register = ()=>{
                 <Text
                  style={styles.TextBtn}
                 >Crear mi usuario</Text>
+                {chargerRound}
             </TouchableOpacity>
             <TouchableOpacity
              onPress = {()=>{
@@ -213,6 +227,7 @@ const styles = StyleSheet.create({
         backgroundColor:'#0564B3',
         width:'85%',
         height:45,
+        flexDirection:'row',
         justifyContent:'center',
         alignItems:'center',
         borderRadius:30,

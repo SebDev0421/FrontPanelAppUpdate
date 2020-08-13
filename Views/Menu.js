@@ -54,13 +54,13 @@ const Menu = (props)=>{
         move = 0
        swipeEffect()
        if(props.userCred.roll === '1'){
-           setRoll('Administrador')
+           setRoll('Ordenante')
            setBtnAdmin()
        }else if(props.userCred.roll === '2'){
            setRoll('Operario')
            setBtnAdmin()
        }else{
-        setRoll('Gerente')
+        setRoll('Gerencia')
         setKing(<Image
             source = {require('../Images/corona.png')}
             style = {{width:40,height:40}}

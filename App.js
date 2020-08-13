@@ -37,7 +37,7 @@ import Register from './Views/Register';
 import Entry from './Views/Entry';
 import TaskService from './Views/TaskService';
 import LoadingScreen from './Views/LoadingScreen';
-
+import RecoveryPassword from './Views/RecoveryPassword';
 
 
 LogBox.ignoreAllLogs(true)
@@ -48,6 +48,7 @@ const App: () => React$Node = () => {
   let [taskService, setTaskService] = useState()
   let [viewLogin,setViewLogin] = useState()
   let [viewRegister,setViewRegister] = useState()
+  let [viewRecovery,setViewRecovery] = useState()
   let [viewEntry,setViewEntry] = useState(<LoadingScreen/>)
   useEffect(()=>{
 
@@ -81,6 +82,18 @@ const App: () => React$Node = () => {
       setTaskService()
       setViewLogin(<Login/>)
     })
+
+    EventEmitter.on('onOpenRecovery',(email)=>{
+      
+      setViewRecovery(<RecoveryPassword
+       email = {email}
+      />)
+
+    })
+
+    EventEmitter.on('onCloseRecovery',()=>{
+      setViewRecovery()
+    })
     
  
   },[])
@@ -94,6 +107,7 @@ const App: () => React$Node = () => {
           style={styles.scrollView}>
             {viewLogin}
             {viewRegister}
+            {viewRecovery}
         </ScrollView>
         {viewEntry}
         {taskService}

@@ -15,41 +15,47 @@ import{
 
 import APIdata from '../Src/APIdata'
 import EventEmitter from 'react-native-eventemitter';
+import * as Progress from 'react-native-progress';
 
-const APILogin = (email,password)=>{
-    fetch(APIdata.URI+'/login',{
-        method:'PUT',
-        body:JSON.stringify({email:email,password:password}),
-        headers:{
-            'Content-Type': 'application/json'
-        }
-    }).then(function(res){return res.json()})
-      .then(async(res) => {
-          if(res.status === 302){
-              alert('Algo salio mal revisa de nuevo')
-              return 0
-          }
-          if(res.status.password === password && res.status.auth === '1'){
-            try{
-                await AsyncStorage.setItem('credentialsAPPfront',JSON.stringify(res.status))
-                EventEmitter.emit('openService',true)
-                return 0
-            }catch(e){
-                console.log(e)
-            }
-          }
-          alert('Su cuenta no a sido autorizada o la contraseña es incorrecta')
-      })
-      .catch(err => {
 
-        alert('Hubo un error tratando de conectar a los servidores')
-      })
-}
 
 const Login = ()=>{
     let [visibility,setVisiblity] = useState(true)
     let [email,setEmail] = useState('')
     let [password, setPassword] = useState('')
+    var [chargerRound,setChargerRound] = useState()
+    const APILogin = (email,password)=>{
+        fetch(APIdata.URI+'/login',{
+            method:'PUT',
+            body:JSON.stringify({email:email,password:password}),
+            headers:{
+                'Content-Type': 'application/json'
+            }
+        }).then(function(res){return res.json()})
+          .then(async(res) => {
+              if(res.status === 302){
+                  alert('Algo salio mal revisa de nuevo')
+                  setChargerRound()
+                  return 0
+              }
+              if(res.status.password === password && res.status.auth === '1'){
+                try{
+                    await AsyncStorage.setItem('credentialsAPPfront',JSON.stringify(res.status))
+                    setChargerRound()
+                    EventEmitter.emit('openService',true)
+                    return 0
+                }catch(e){
+                    console.log(e)
+                }
+              }
+              setChargerRound()
+              alert('Su cuenta no a sido autorizada o la contraseña es incorrecta')
+          })
+          .catch(err => {
+            setChargerRound()
+            alert('Hubo un error tratando de conectar a los servidores')
+          })
+    }
     return(
         <View style={styles.container}>
             <Image source={require('../Images/frontPanel.png')} style={{width:200,height:100,marginVertical:50}}/>
@@ -89,7 +95,11 @@ const Login = ()=>{
             </TouchableOpacity>
             </View>
             <View style={{marginVertical:7}}>
-                <TouchableNativeFeedback>
+                <TouchableNativeFeedback
+                 onPress = {()=>{
+                     EventEmitter.emit('onOpenRecovery',email);
+                 }}
+                >
                     <Text>Olvidaste tu contraseña?</Text>
                 </TouchableNativeFeedback>
             </View>
@@ -98,9 +108,12 @@ const Login = ()=>{
             <TouchableOpacity
              style={styles.ButtonLogin}
              onPress={()=>{
+                setChargerRound(<Progress.CircleSnail color={['white']}/>)
                  if(email === '' || password === ''){
                     alert('Llena todos los campos')
+                    setChargerRound()
                     return 0
+                    
                  }
                  APILogin(email,password)
                  
