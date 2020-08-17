@@ -30,6 +30,24 @@ const isCloseToBottom = ({layoutMeasurement, contentOffset, contentSize}) => {
 
 var listOrders = [];
 
+const writeAPINotifiactionsTask = async(numOrder,status)=>{
+    await fetch(APIdata.URI+'/NotificationsWrite',{
+        method:'PUT',
+        body: JSON.stringify({numOrder:numOrder,status:status}),
+        headers:{
+            'Content-Type': 'application/json'
+        }
+    }).then(res => res.json())
+      .then((res) => {
+          console.log(res)
+          if(res.satus === 200){
+              return true
+          }
+          
+      })
+      .catch(e=>console.log(e))
+}
+
 const APInewOrder = (ordenante,numOrder,concept,uds,process,finishDate,observations,id,nameUser) =>{
     fetch(APIdata.URI+'/addNewTask',{
         method:'PUT',
@@ -41,6 +59,7 @@ const APInewOrder = (ordenante,numOrder,concept,uds,process,finishDate,observati
      .then(res => {
          console.log(res)
          if(res.status === 78){
+             writeAPINotifiactionsTask(numOrder,1)
              Socket.emit('onNewOrder',{
                  numOrder:numOrder,
                  name:nameUser

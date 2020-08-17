@@ -56,7 +56,8 @@ const NotificationLocal = (title,body)=>{
 
 const abortController = new AbortController()
 
-const IndicatorTask = ()=>{
+const IndicatorTask = (props)=>{
+
     return(
         <View
                  style = {{
@@ -75,42 +76,97 @@ const IndicatorTask = ()=>{
                      style = {{
                          color:'white'
                      }}
-                    >2</Text>
+                    >{props.numTasks}</Text>
         </View>
     )
 }
+
+var vectorRead = []
+var numberNotifi = 0
 
 const TaskService = () => {
     let [createOrderView, setCreateOderView] = useState()
     let [menuView, setMenuView] = useState()
     let [userCredentials,setUserCredentials] = useState({})
     let [actuallyTasks, setActuallyTasks] = useState([])
+    let [notificationsAPI, setNotificationsAPI] = useState([])
     let [viewFloatingButton, setViewFloatingButton] = useState()
     let [btnCloseEdit, setBtnCloseEdit] = useState()
     let [historyView,setHistoryView] = useState()
-    let [sizeTasks, setSizeTasks] = useState(<IndicatorTask/>)
+    let [sizeTasks, setSizeTasks] = useState()
     let [viewListNotifications, setViewListNotifiactions] = useState()
     let [toogleList, setToogleList] = useState(false)
+    let [taskNotifiNum, setTaskNotifiNum] = useState(0)
+
+    const writeNumberNotifications = async(value)=>{
+        try{
+            await AsyncStorage.setItem('numNotificationsView',value)
+        }catch(e){
+            console.log(e)
+        }
+    }
+
+    const readNumbreNotifications = async(value)=> {
+        const numNotViews = await AsyncStorage.getItem('numNotificationsView');
+        
+        if(numNotViews === null){
+            numberNotifi = value
+        }else{
+            numberNotifi = value - parseInt(numNotViews)
+            setSizeTasks(<IndicatorTask
+                numTasks = {numberNotifi}
+            />)
+            console.log(numberNotifi)
+        }
+    }
+
     useEffect(()=>{
 
         
         abortController.abort()
-        const readAPITask = ()=>{
-            fetch(APIdata.URI+'/readTasks',{
+        
+        const readAPITask = async()=>{
+            await fetch(APIdata.URI+'/readTasks',{
                 method:'PUT',
                 body: JSON.stringify({status:'actually'}),
                 headers:{
                     'Content-Type': 'application/json'
                 }
             }).then(res => res.json())
-              .then(res => {
+              .then((res) => {
                   setActuallyTasks(res)
               })
               .catch(e=>console.log(e))
+                
+                         
         }
+
+
+        const readAPINotifiactionsTask = async()=>{
+            await fetch(APIdata.URI+'/NotificationsRead',{
+                method:'PUT',
+                body: JSON.stringify({status:'actually'}),
+                headers:{
+                    'Content-Type': 'application/json'
+                }
+            }).then(res => res.json())
+              .then((res) => {
+                  setNotificationsAPI(res)
+                  vectorRead = res
+                  
+              })
+              .catch(e=>console.log(e))
+                readNumbreNotifications(vectorRead.length)
+                setTaskNotifiNum(vectorRead.length)
+        }
+
         
 
+        // read API 
         readAPITask()
+        readAPINotifiactionsTask()
+
+
         const readAsync = async()=>{
             const idRead = await AsyncStorage.getItem('credentialsAPPfront')
             idReadParse = JSON.parse(idRead)
@@ -129,6 +185,7 @@ const TaskService = () => {
         Socket.on('onDatesNewOrder',(data)=>{
             console.log(data)
             //generate Notification
+            readAPINotifiactionsTask()
             NotificationLocal('Se ha creado una Orden','La orden '+data.numOrder+' ha sido creada')
             readAPITask()
         })
@@ -137,13 +194,15 @@ const TaskService = () => {
             console.log(data)
             //generate Notification
             NotificationLocal('Se ha eliminado una orden','La orden '+data.numOrder+' ha sido eliminada')
+            readAPINotifiactionsTask()
             readAPITask()
         })
 
         Socket.on('onDatesEditOrder',(data)=>{
             console.log(data)
-            //generate Notification
+            //generate Notifications
             NotificationLocal('Se ha modificado una Orden','La orden '+data.numOrder+' ha sido modificada')
+            readAPINotifiactionsTask()
             readAPITask()
         })
 
@@ -151,6 +210,7 @@ const TaskService = () => {
             console.log(data)
             //generate Notification
             NotificationLocal('Orden completada','La orden '+data.numOrder+' ha sido entregada y finalizada')
+            readAPINotifiactionsTask()
             readAPITask()
         })
 
@@ -196,7 +256,10 @@ const TaskService = () => {
         })
 
         EventEmmiter.on('onOpenHistory',()=>{
-            setHistoryView(<History/>)
+            console.log(userCredentials)
+            setHistoryView(<History
+             UserCred = {userCredentials}
+            />)
         })
     },[])
        return(
@@ -244,7 +307,12 @@ const TaskService = () => {
                     setViewListNotifiactions()
                     setToogleList(false)
                  }else{
-                    setViewListNotifiactions(<ListNotification/>)
+                    
+                    setViewListNotifiactions(<ListNotification
+                     notifi = {notificationsAPI}
+                    />)
+                    writeNumberNotifications(taskNotifiNum.toString())
+                    readNumbreNotifications(notificationsAPI.length)
                     setToogleList(true)
                  }
              }}

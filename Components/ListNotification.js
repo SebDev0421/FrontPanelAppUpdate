@@ -4,26 +4,31 @@ import{
     Text,
     ScrollView,
     StyleSheet,
+    TouchableOpacity,
 } from 'react-native';
 
-const DataDeploy = () => {
+
+
+const DataDeploy = (props) => {
+
     return(
         <View
          style = {styles.cardNotifications}
         >
+            
             <Text
              style = {styles.TitleNot}
-            >Orden creada</Text>
+            >{props.payer}</Text>
             <View
              style = {styles.body}
             >
-              <Text>Se ha creado la orden 1578</Text>
+              <Text>{props.numOrder}</Text>
             </View>
         </View>
     )
 }
 
-const ListNotification = () => {
+const ListNotification = (props) => {
     return(
         <View
          style = {styles.container}
@@ -31,22 +36,35 @@ const ListNotification = () => {
             <ScrollView
              style = {styles.ScrollSet}
             >
-                <DataDeploy/>
-                <DataDeploy/>
-                <DataDeploy/>
-                <DataDeploy/>
-                <DataDeploy/>
-                <DataDeploy/>
-                <DataDeploy/>
-                <DataDeploy/>
-                <DataDeploy/>
-                <DataDeploy/>
-                <DataDeploy/>
-                <DataDeploy/>
-                <DataDeploy/>
-                <DataDeploy/>
-                <DataDeploy/>
-                <DataDeploy/>
+                {props.notifi.slice(0).reverse().map((value)=>{
+                    switch(value.status){
+                        case '1' : return(
+                            <DataDeploy
+                        payer = {'Orden creada'}
+                        numOrder = {'Se ha creado la orden '+value.numOrder}
+                    />   
+                    )
+                    case '2' : return(
+                        <DataDeploy
+                    payer = {'Orden editada'}
+                    numOrder = {'Se ha editado la orden '+value.numOrder}
+                />   
+                )
+                case '3' : return(
+                    <DataDeploy
+                payer = {'Orden eliminada'}
+                numOrder = {'Se ha eliminado la orden '+value.numOrder}
+            />   
+            )
+            case '4' : return(
+                <DataDeploy
+            payer = {'Orden Completada'}
+            numOrder = {'Se ha completado la orden '+value.numOrder}
+        />   
+        )
+                    }
+                    
+                })}
             </ScrollView>
         </View>
     )

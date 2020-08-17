@@ -95,6 +95,37 @@ const CardHistory = (props) => {
     let [boolExpand,setBoolExpand] = useState(false)
     let [arrowChange, setArrowChange] = useState(<Image source = {require('../Images/arrowdown.png')} style={{width:30,height:30}}/>)
     let [expandView,setExpandView] = useState()
+    let [btnEliminate, setBtnEliminate] = useState(<TouchableOpacity
+        style = {{position:'absolute',top:12,right:60}}
+        onPress={()=>{
+            Alert.alert('Eliminar orden','Esta seguro de eliminar la orden del historial',
+            [
+                {
+                    text:'Cancelar',
+                    style:'cancel'
+                },
+                {
+                    text:'Confirmar',
+                    onPress:()=>{
+                        APIDeleteTask(props.dataCard._id)
+                    }
+                }
+            ]
+            )
+        }}
+       >
+           <Image
+            source = {require('../Images/cerrarGray.png')}
+            style={{width:22,height:22}}
+           />
+       </TouchableOpacity>)
+    useEffect(()=>{
+
+        if(props.roll === '2'){
+            setBtnEliminate()
+        }
+        
+    })
     return(
         <View
          style = {styles.container}
@@ -109,6 +140,7 @@ const CardHistory = (props) => {
              style={styles.subText}
             >Unidades: {props.dataCard.uds}</Text>
             {expandView}
+            {btnEliminate}
             <TouchableOpacity
             style = {{position:'absolute',top:10,right:10}}
             onPress = {()=>{
@@ -127,30 +159,7 @@ const CardHistory = (props) => {
            >
                {arrowChange}
            </TouchableOpacity>
-           <TouchableOpacity
-            style = {{position:'absolute',top:12,right:60}}
-            onPress={()=>{
-                Alert.alert('Eliminar orden','Esta seguro de eliminar la orden del historial',
-                [
-                    {
-                        text:'Cancelar',
-                        style:'cancel'
-                    },
-                    {
-                        text:'Confirmar',
-                        onPress:()=>{
-                            APIDeleteTask(props.dataCard._id)
-                        }
-                    }
-                ]
-                )
-            }}
-           >
-               <Image
-                source = {require('../Images/cerrarGray.png')}
-                style={{width:22,height:22}}
-               />
-           </TouchableOpacity>
+           
         </View>
     )
 }

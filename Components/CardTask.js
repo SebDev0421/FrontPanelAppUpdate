@@ -17,7 +17,23 @@ import Socket from '../Src/SocketListener';
 
 import CheckBox from 'react-native-check-box';
 
-
+const writeAPINotifiactionsTask = async(numOrder,status)=>{
+    await fetch(APIdata.URI+'/NotificationsWrite',{
+        method:'PUT',
+        body: JSON.stringify({numOrder:numOrder,status:status}),
+        headers:{
+            'Content-Type': 'application/json'
+        }
+    }).then(res => res.json())
+      .then((res) => {
+          console.log(res)
+          if(res.satus === 200){
+              return true
+          }
+          
+      })
+      .catch(e=>console.log(e))
+}
 
 const APIRefreshTask = (find,process) => {
     fetch(APIdata.URI+'/pushTask',{
@@ -104,6 +120,7 @@ const APISendTaskHistory = (_id,numOrder)=>{
     .then(res => res.json())
     .then(res => {
         if(res.status === 38){
+            writeAPINotifiactionsTask(numOrder,4)
             Socket.emit('onCompleteTask',{numOrder:numOrder})
         }
     })
@@ -253,6 +270,7 @@ const CardTask = (props)=>{
                   }).then(res => res.json())
                   .then(res => {
                       if(res === 'ok'){
+                          writeAPINotifiactionsTask(props.dataTask.numOrder,3)
                           Socket.emit('onDeleteTask',{name:props.userCred.name,number:props.dataTask.numOrder})
                       }
                   })

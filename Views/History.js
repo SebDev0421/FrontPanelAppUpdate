@@ -34,12 +34,13 @@ const swipeEffect = () => {
 }
 
 
-const History = ()=>{
+const History = (props) =>{
     let [dataHistory,setDataHistory] = useState([]);
+    let [roll, setRoll] = useState({})
     useEffect(()=>{
        move = 0
        swipeEffect()
-
+       setRoll(props.UserCred.roll)
        const ReadAPIHistory = ()=>{
            fetch(APIdata.URI+'/getHistory',{
                method:'PUT',
@@ -54,7 +55,8 @@ const History = ()=>{
        }
 
        ReadAPIHistory()
-
+       
+       
        EventEmitter.on('onDeleteHistoryOrder',()=>{
            Notifications.postLocalNotification({
                title:'Orden eliminada del historial',
@@ -85,6 +87,7 @@ const History = ()=>{
                           >
                               <CardHistory
                                dataCard = {value}
+                               roll = {roll}
                               />
                           </View>
                       )
@@ -95,9 +98,7 @@ const History = ()=>{
              style = {styles.btnBack}
              onPress = {()=>{
                  move = Dimensions.get('window').width
-                 
                  swipeEffect()
-
                  EventEmitter.emit('onCloseHistory',true)
                  
              }}

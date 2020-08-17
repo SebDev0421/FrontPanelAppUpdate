@@ -53,6 +53,7 @@ const Login = ()=>{
           })
           .catch(err => {
             setChargerRound()
+            console.log(err)
             alert('Hubo un error tratando de conectar a los servidores')
           })
     }
