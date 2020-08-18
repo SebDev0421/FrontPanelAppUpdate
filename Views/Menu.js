@@ -9,7 +9,8 @@ import{
     ScrollView,
     Image,
     AsyncStorage,
-    Alert
+    Alert,
+    BackHandler
 } from 'react-native';
 
 import Header from './Header';
@@ -95,7 +96,21 @@ const Menu = (props)=>{
        
        EventEmitter.on('onCloseSetting',()=>{
            setViewOpenMenu()
-       }) 
+       })
+
+       const backAction = () => {
+        move = Dimensions.get('window').width
+        swipeEffect()
+                  
+        EventEmitter.emit('onCloseMenu',true)
+        return true;
+    }
+    const backHandler = BackHandler.addEventListener(
+        "hardwareBackPress",
+        backAction
+    )
+
+    return () => backHandler.remove();
 
     },[])
     return(

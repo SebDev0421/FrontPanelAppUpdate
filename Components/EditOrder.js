@@ -42,7 +42,7 @@ const writeAPINotifiactionsTask = async(numOrder,status)=>{
           console.log(res)
           if(res.satus === 200){
               return true
-          }         
+          }
       })
       .catch(e=>console.log(e))
 }
@@ -235,7 +235,6 @@ const EditOrder = (props)=>{
                       console.log(date)
                       setDateValue(date)
                   }}
-                  
                  />
                  <Text>Observaciones</Text>
                  <ScrollView style={{width:'100%'}}>

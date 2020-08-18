@@ -120,6 +120,47 @@ const TaskService = () => {
         }
     }
 
+    const refreshTasks = () =>{
+        const readAPITask = async()=>{
+            await fetch(APIdata.URI+'/readTasks',{
+                method:'PUT',
+                body: JSON.stringify({status:'actually'}),
+                headers:{
+                    'Content-Type': 'application/json'
+                }
+            }).then(res => res.json())
+              .then((res) => {
+                  setActuallyTasks(res)
+              })
+              .catch(e=>console.log(e))       
+        }
+
+
+        const readAPINotifiactionsTask = async()=>{
+            await fetch(APIdata.URI+'/NotificationsRead',{
+                method:'PUT',
+                body: JSON.stringify({status:'actually'}),
+                headers:{
+                    'Content-Type': 'application/json'
+                }
+            }).then(res => res.json())
+              .then((res) => {
+                  setNotificationsAPI(res)
+                  vectorRead = res
+                  
+              })
+              .catch(e=>console.log(e))
+                readNumbreNotifications(vectorRead.length)
+                setTaskNotifiNum(vectorRead.length)
+        }
+
+        
+
+        // read API 
+        readAPITask()
+        readAPINotifiactionsTask()
+    }
+
     useEffect(()=>{
 
         
@@ -213,7 +254,7 @@ const TaskService = () => {
             readAPINotifiactionsTask()
             readAPITask()
         })
-
+        
         EventEmmiter.on('onCloseCreateOrder',()=>{
             setCreateOderView()
         })
@@ -267,8 +308,33 @@ const TaskService = () => {
             <Header
               Title={'FRONT PANEL'}
             />
-            <ScrollView style = {{width:'100%'}}>
+            <ScrollView 
+            
+            style = {{width:'100%'}}>
             <View style = {{width:'100%',height:'100%',alignItems:'center'}}>
+            <TouchableOpacity
+             style = {{
+                 height:30,
+                 width:'90%',
+                 backgroundColor:'#0564B3',
+                 marginVertical:5,
+                 alignItems:'center',
+                 justifyContent:'center',
+                 flexDirection:'row'
+                 
+             }}
+             onPress = {()=>{
+                 refreshTasks()
+             }}
+            >
+                <Image
+                 source = {require('../Images/refresh.png')}
+                 style={{width:20,height:20}}
+                />
+                <Text
+                 style={{color:'white'}}
+                > Actualizar tareas</Text>
+            </TouchableOpacity>
             {actuallyTasks.map((data)=>{
                 return(
                     <View

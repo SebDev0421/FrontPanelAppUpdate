@@ -6,7 +6,8 @@ import{
     View,
     Text,
     TextInput,
-    TouchableOpacity
+    TouchableOpacity,
+    BackHandler
 }from 'react-native';
 
 import APIdata from '../Src/APIdata'
@@ -56,7 +57,18 @@ const APIRegister = (name,lastName,roll,email,password)=>{
         alert('Hubo un error')
       })
 }
+   useEffect(()=>{
+    const backAction = () => {
+        EventEmitter.emit('onCloseRegister',true)
+        return true;
+    }
+    const backHandler = BackHandler.addEventListener(
+        "hardwareBackPress",
+        backAction
+    )
 
+    return () => backHandler.remove();
+   },[])
 
     return(
         <View style={styles.container}>
@@ -185,7 +197,7 @@ const APIRegister = (name,lastName,roll,email,password)=>{
                      if(password.length > 5){
                         if(comparePass)
                         setChargerRound(<Progress.CircleSnail color={['white']}/>)
-                        APIRegister(name,lastName,selectRoll,email,password);    
+                        APIRegister(name,lastName,selectRoll,email.toLowerCase(),password);    
                      }else{
                          alert('La contrasena debe contener al menos 6 caracteres')
                      }

@@ -7,7 +7,8 @@ import{
     Text,
     ScrollView,
     Image,
-    AsyncStorage
+    AsyncStorage,
+    BackHandler
 } from 'react-native';
 
 import APIdata from '../Src/APIdata';
@@ -24,14 +25,6 @@ const changeLocalData = async(data)=>{
      }
 }
 
-const deleteUserLocal = async (data)=>{
-    try{
-        await AsyncStorage.setItem('credentialsAPPfront','');
-        EventEmitter.emit('closeService',true)
-     }catch(e){
-         console.log(e)
-     }
-}
 
 const APIChangeUserData = (find,name,lastName,email,number,id) => {
     fetch(APIdata.URI+'/changeData',{
@@ -40,11 +33,12 @@ const APIChangeUserData = (find,name,lastName,email,number,id) => {
         headers:{
             'Content-Type': 'application/json'
         }
-    }).then(res=>{res.json()})
+    }).then(res=>res.json())
       .then(res=>{
-          console.log(res)
+          console.log(res.status)
           if(res.status !== 95){
             alert('Sus datos fueron cambiados con exito')
+            console.log(res.status)
             changeLocalData(res.status)
             EventEmmiter.emit('onCloseSetting',true)
             
@@ -55,25 +49,6 @@ const APIChangeUserData = (find,name,lastName,email,number,id) => {
       })
 }
 
-const APIDeleteUser = (find) => {
-    fetch(APIdata.URI+'/deleteData',{
-        method:'PUT',
-        body:JSON.stringify({_id:find}),
-        headers:{
-            'Content-Type': 'application/json'
-        }
-    }).then(res=>{res.json()})
-      .then(res=>{
-          console.log(res)
-          if(res.status === 50){
-            alert('Sus Usuario fue eliminado con exito fueron cambiados con exito')
-            deleteUserLocal()            
-            return 0
-          }else{
-              alert('Error con esta operacion')
-          }
-      })
-}
 
 const Setting = (props) => {
       let  [name, setName] = useState(''),
@@ -83,12 +58,33 @@ const Setting = (props) => {
         [id, setId] = useState(''),
         [enableEdit,setEneableChange] = useState(false)
     useEffect(()=>{
-        getUser = props.CompareObj
-        setName(getUser.name)
-        setLastName(getUser.lastName)
-        setEmail(getUser.email)
-        setNumber(getUser.phone)
-        setId(getUser.idEmployed)
+        var getUser
+
+        const dataUser = async()=>{
+            const data = await AsyncStorage.getItem('credentialsAPPfront')
+            console.log(data)
+            getUser = JSON.parse(data)
+            setName(getUser.name)
+            setLastName(getUser.lastName)
+            setEmail(getUser.email)
+            setNumber(getUser.phone)
+            setId(getUser.idEmployed)
+        }
+
+        dataUser()
+
+        const backAction = () => {
+                      
+            EventEmmiter.emit('onCloseSetting',true)
+            return true;
+        }
+
+        const backHandler = BackHandler.addEventListener(
+            "hardwareBackPress",
+            backAction
+        )
+    
+        return () => backHandler.remove();
 
     },[])
     return(
@@ -169,6 +165,7 @@ const Setting = (props) => {
                     <TouchableOpacity
                     onPress = {()=>{
                         APIChangeUserData(props.dataUser._id,name,lastName,email,number,id)
+                        //console.log(props.dataUser._id)
                     }}
                     style={[styles.BtnsSetting,{backgroundColor:'#49BB3C'}]}>
                         <Text

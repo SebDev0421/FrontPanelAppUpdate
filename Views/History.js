@@ -7,7 +7,8 @@ import{
     Animated,
     Dimensions,
     Image,
-    ScrollView
+    ScrollView,
+    AsyncStorage
 } from 'react-native';
 
 import EventEmitter from 'react-native-eventemitter';
@@ -15,7 +16,6 @@ import CardHistory from '../Components/CardHistory';
 import APIdata from '../Src/APIdata';
 
 import {Notifications} from 'react-native-notifications';
-
 
 import Header from './Header';
 
@@ -36,11 +36,18 @@ const swipeEffect = () => {
 
 const History = (props) =>{
     let [dataHistory,setDataHistory] = useState([]);
-    let [roll, setRoll] = useState({})
+    let [roll, setRoll] = useState('')
     useEffect(()=>{
        move = 0
        swipeEffect()
-       setRoll(props.UserCred.roll)
+       const readUserdata = async()=>{
+        const data = await AsyncStorage.getItem('credentialsAPPfront')
+        const userCred = JSON.parse(data)
+        setRoll(userCred.roll)
+        console.log(userCred.roll)
+    }
+    readUserdata()
+       
        const ReadAPIHistory = ()=>{
            fetch(APIdata.URI+'/getHistory',{
                method:'PUT',
@@ -62,6 +69,7 @@ const History = (props) =>{
                title:'Orden eliminada del historial',
                body:'Has eliminado la orden'
            })
+
            ReadAPIHistory()
        })
     },[])

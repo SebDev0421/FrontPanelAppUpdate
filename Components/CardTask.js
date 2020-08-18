@@ -61,7 +61,8 @@ const APIProcess = async (_id)=>{
       .then(res =>{
           if(res.status !== 73 ){
               //console.log('onPushNewTask'+_id)
-              EventEmmiter.emit('onPushNewTask'+_id,res.status) 
+              console.log(res)
+              EventEmmiter.emit('onPushNewTask'+_id,res.status,res.concpet,res.observations) 
           }
           
       })
@@ -152,7 +153,7 @@ const ExpanCard = (props) =>{
             <Text
              style = {styles.TitleProps}
             >Concepto</Text>
-            <Text>{props.dataExpand.concept}</Text>
+            <Text>{props.concept}</Text>
         </View>
         <Text
          style = {styles.TitleProps}
@@ -189,7 +190,7 @@ const ExpanCard = (props) =>{
             <Text
              style = {styles.TitleProps}
             >Observaciones</Text>
-            <Text>{props.dataExpand.observations}</Text>
+            <Text>{props.observations}</Text>
         </View>
         <View
          style={styles.containerBtn}
@@ -254,6 +255,7 @@ const CardTask = (props)=>{
     let [viewAlert,setViewAlert] = useState()
     let [taskPass , setTaskPass] = useState([])
     useEffect(()=>{
+        console.log(props.dataTask.concept)
         setTaskPass(props.dataTask.process)
         EventEmmiter.on('onEnableBtnDelete',()=>{
             setBtnSecond(
@@ -326,7 +328,7 @@ const CardTask = (props)=>{
             setBtnSecond()
         })
 
-        EventEmmiter.on('onPushNewTask'+props.dataTask._id,(data)=>{
+        EventEmmiter.on('onPushNewTask'+props.dataTask._id,(data,concept,observations)=>{
         var dateyear =  dateNow.getFullYear().toString()
         var dateMonth =  (dateNow.getMonth()+1).toString()
         var dateDay =  (dateNow.getDate()).toString()
@@ -343,11 +345,16 @@ const CardTask = (props)=>{
         }else{
             colorDate = false
         }
-            setExpandView(<ExpanCard
-                task = {data}
-                dataExpand = {props.dataTask}
-                dateAlert = {colorDate}
-            />)
+
+        console.log(props.dataTask.concept)
+        
+        setExpandView(<ExpanCard
+            task = {data}
+            dataExpand = {props.dataTask}
+            dateAlert = {colorDate}
+            concept = {concept}
+            observations = {observations}
+        />)
         })
     },[])
 

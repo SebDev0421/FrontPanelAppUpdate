@@ -9,7 +9,8 @@ import{
     TouchableOpacity,
     Animated,
     StyleSheet,
-    Alert
+    Alert,
+    AsyncStorage
 } from 'react-native'
 
 
@@ -89,8 +90,16 @@ const CreateOrder = (props)=>{
     let [nameUser,setNameUser] = useState('')
     
     useEffect(()=>{
-        setIdUser(props.userCred._id)
-        setNameUser(props.userCred.name)
+        const readUserdata = async()=>{
+            const data = await AsyncStorage.getItem('credentialsAPPfront')
+            const userCred = JSON.parse(data)
+            setIdUser(userCred._id)
+            setNameUser(userCred.name)
+            setOrdenante(userCred.name)
+
+        }
+        readUserdata()
+        
     },[])
 
     return(
@@ -127,6 +136,7 @@ const CreateOrder = (props)=>{
                  onChangeText = {(value) => {
                      setOrdenante(value)
                  }}
+                 value = {ordenante}
                 />
                 <Text>No orden</Text>
                 <TextInput

@@ -1,16 +1,34 @@
-import React from 'react';
+import React ,{useEffect,useState}from 'react';
 import{
     View,
     TouchableOpacity,
     StyleSheet,
     Image,
-    Text
+    Text,
+    BackHandler
 } from 'react-native';
 
 import EventEmmiter from 'react-native-eventemitter';
 import Header from './Header';
+import SendSugerence from './SendSugerence';
 
 const AboutUs = () => {
+    let [viewAdvice, setViewAdvice] = useState()
+    useEffect(()=>{
+        EventEmmiter.on('onCloseTextInputSugerence',()=>{
+            setViewAdvice()
+        })
+        const backAction = () => {
+            EventEmmiter.emit('onCloseSetting',true)
+            return true;
+        }
+        const backHandler = BackHandler.addEventListener(
+            "hardwareBackPress",
+            backAction
+        )
+    
+        return () => backHandler.remove();
+    },[])
     return(
         <View
          style={styles.container}
@@ -28,6 +46,9 @@ const AboutUs = () => {
             <Text>FRONT PANEL APP v1.0.0</Text>
             <TouchableOpacity
              style={styles.btnRecome}
+             onPress = {()=>{
+                 setViewAdvice(<SendSugerence/>)
+             }}
             >
                 <Text
                  style={styles.TextBtn}
@@ -46,6 +67,7 @@ const AboutUs = () => {
                            style={{width:35,height:35}}
                     />
                 </TouchableOpacity>
+            {viewAdvice}
         </View>
 
     )

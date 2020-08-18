@@ -102,6 +102,9 @@ const App: () => React$Node = () => {
       <SafeAreaView
        style={{width:'100%',height:'100%'}}
       >
+      <StatusBar
+       backgroundColor={'#0564B3'}
+      />
         <ScrollView
           contentInsetAdjustmentBehavior="automatic"
           style={styles.scrollView}>

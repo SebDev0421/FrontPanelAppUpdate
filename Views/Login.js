@@ -116,7 +116,7 @@ const Login = ()=>{
                     return 0
                     
                  }
-                 APILogin(email,password)
+                 APILogin(email.toLowerCase(),password)
                  
             }}
             >

@@ -28,6 +28,9 @@ const CheckBoxRender = (props)=>{
             <Text>{props.task.name}</Text>
             <CheckBox
              isChecked = {marker}
+             onClick = {()=>{
+                 return true
+             }}
             />
         </View>
     )
