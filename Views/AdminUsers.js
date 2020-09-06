@@ -118,11 +118,11 @@ const AdminUsers = () => {
                  {users.map((value)=>{
                      var defineRoll = ''
                      if(value.roll === '1'){
-                       defineRoll = 'Administrador'    
+                       defineRoll = 'Ordenante'    
                      }else if(value.roll === '2'){
                        defineRoll = 'Operario'    
                      }else if(value.roll === '3'){
-                        defineRoll = 'Gerente'
+                        defineRoll = 'Gerencia'
                      }
                      return(
                          <CardUserRender

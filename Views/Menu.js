@@ -20,6 +20,7 @@ import Terms from './Terms';
 
 import EventEmitter from 'react-native-eventemitter';
 import AdminUsers from './AdminUsers';
+import APIdata from '../Src/APIdata';
 
 const animation = new Animated.Value(Dimensions.get('window').width);
 let move = 0
@@ -35,9 +36,31 @@ const swipeEffect = () => {
     ).start()
 }
 
+
+const APIdeleteToken = async ()=>{
+    const token = await AsyncStorage.getItem('tokenDevice')
+    fetch(APIdata.URI+'/deleteToken',{
+        method:'PUT',
+        body:JSON.stringify({tokenId:token}),
+        headers:{
+            'Content-Type':'application/json'
+        }
+    }).then(res => res.json())
+      .then(res => {
+          if(res.status === 200){
+              return true
+          }
+      })
+      .catch((e)=>{
+          if(e) throw e
+      })
+}
+
 const logout = async()=>{
     try{
         await AsyncStorage.setItem('credentialsAPPfront','');
+        APIdeleteToken()
+        await AsyncStorage.setItem('tokenDevice','')
         EventEmitter.emit('closeService',true)
 
      }catch(e){
@@ -120,7 +143,7 @@ const Menu = (props)=>{
         }]}
         >
             <Header
-             Title = "Menu"
+             Title = "Menú"
             />
             <ScrollView style={styles.ScrollSetting}>
             <View style={styles.containerOptions}>
@@ -136,7 +159,7 @@ const Menu = (props)=>{
                         </View>
                         <View>
                             <Text>{props.userCred.name} {props.userCred.lastName}</Text>
-                            <Text>Front panel</Text>
+                            <Text>Front Panel</Text>
                             <Text>{props.userCred.email}</Text>
                             <View
                              style = {{flexDirection:'row',alignItems:'center'}}
@@ -153,15 +176,15 @@ const Menu = (props)=>{
                         <TouchableOpacity
                          onPress = {() => {
                                 setViewOpenMenu(<Setting
-                                 dataUser = {props.userCred}
-                                 CompareObj = {props.userCred}
+                                dataUser = {props.userCred}
+                                CompareObj = {props.userCred}
                                 />)
                          }}
                          style = {[styles.Item,{
                             borderBottomWidth:1,
                             borderBottomColor:'gray'}]}
                         >
-                            <Text style={styles.TextItem}>Configuracion</Text>
+                            <Text style={styles.TextItem}>Configuración</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                           onPress = {() => {
@@ -181,7 +204,7 @@ const Menu = (props)=>{
                             borderBottomWidth:1,
                             borderBottomColor:'gray'}]}
                         >
-                            <Text style={styles.TextItem}>Terminos y condiciones</Text>
+                            <Text style={styles.TextItem}>Términos y condiciones</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                          style = {styles.Item}
@@ -198,7 +221,7 @@ const Menu = (props)=>{
                             ])
                          }}
                         >
-                            <Text style={styles.TextItem}>Cerrar sesion</Text>
+                            <Text style={styles.TextItem}>Cerrar sesión</Text>
                         </TouchableOpacity>
                     </View>
                 </View>

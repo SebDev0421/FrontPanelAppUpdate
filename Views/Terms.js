@@ -19,7 +19,7 @@ const Terms = () => {
          style={styles.container}
         >
             <Header
-             Title = {'Terminos'}
+             Title = {'Términos'}
             />
             <View
              style={{width:'100%',alignItems:'center'}}
@@ -32,7 +32,7 @@ const Terms = () => {
                 >
                 <Text
                  style={{fontSize:25,fontWeight:'bold'}}
-                >Termino y condiciones</Text>
+                >Términos y condiciones</Text>
                 <Text
                  style={{marginHorizontal:20,marginVertical:20}}
                 >

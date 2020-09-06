@@ -64,11 +64,30 @@ const Setting = (props) => {
             const data = await AsyncStorage.getItem('credentialsAPPfront')
             console.log(data)
             getUser = JSON.parse(data)
-            setName(getUser.name)
-            setLastName(getUser.lastName)
-            setEmail(getUser.email)
-            setNumber(getUser.phone)
-            setId(getUser.idEmployed)
+            fetch(APIdata.URI+'/consult',{
+                method:'PUT',
+                body:JSON.stringify({_id:getUser._id}),
+                headers:{
+                    'Content-Type':'application/json'
+                }
+            }).then(res => res.json())
+              .then((res)=>{
+                if(res.status === 95){
+                    alert('Este usuario ya no existe contacte con el gerente')
+                    return 0
+                }
+                const getUserData = res.status
+                setName(getUserData.name)
+                setLastName(getUserData.lastName)
+                setEmail(getUserData.email)
+                setNumber(getUserData.phone)
+                setId(getUserData.idEmployed)
+              }).
+              catch((e)=>{
+                  alert('Error en la connexion')
+                  if(e) throw e
+              })
+            
         }
 
         dataUser()
@@ -94,7 +113,7 @@ const Setting = (props) => {
          }
         >
             <Header
-             Title = {'Configuracion'}
+             Title = {'Configuración'}
             />
              <ScrollView
               style={{width:'100%',height:'100%'}}
@@ -137,7 +156,7 @@ const Setting = (props) => {
                     />
                     <Text
                      style={styles.TextTitle}
-                    >Numero telefonico</Text>
+                    >Número telefónico</Text>
                     <TextInput
                       style = {styles.TextInput}
                       placeholder = {'Telefono'}

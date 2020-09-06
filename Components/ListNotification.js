@@ -5,6 +5,7 @@ import{
     ScrollView,
     StyleSheet,
     TouchableOpacity,
+    Image
 } from 'react-native';
 
 
@@ -24,9 +25,12 @@ const DataDeploy = (props) => {
             >
               <Text>{props.numOrder}</Text>
             </View>
+           
         </View>
     )
 }
+
+
 
 const ListNotification = (props) => {
     return(
@@ -36,26 +40,23 @@ const ListNotification = (props) => {
             <ScrollView
              style = {styles.ScrollSet}
             >
-                {props.notifi.slice(0).reverse().map((value)=>{
+                {props.notifi.map((value)=>{
                     switch(value.status){
                         case '1' : return(
                             <DataDeploy
+                        idNotification = {value._id}
                         payer = {'Orden creada'}
                         numOrder = {'Se ha creado la orden '+value.numOrder}
                     />   
                     )
                     case '2' : return(
                         <DataDeploy
+                        idNotification = {value._id}
                     payer = {'Orden editada'}
                     numOrder = {'Se ha editado la orden '+value.numOrder}
                 />   
                 )
-                case '3' : return(
-                    <DataDeploy
-                payer = {'Orden eliminada'}
-                numOrder = {'Se ha eliminado la orden '+value.numOrder}
-            />   
-            )
+                
             case '4' : return(
                 <DataDeploy
             payer = {'Orden Completada'}

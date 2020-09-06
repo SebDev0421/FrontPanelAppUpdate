@@ -62,9 +62,8 @@ const APIProcess = async (_id)=>{
           if(res.status !== 73 ){
               //console.log('onPushNewTask'+_id)
               console.log(res)
-              EventEmmiter.emit('onPushNewTask'+_id,res.status,res.concpet,res.observations) 
+              EventEmmiter.emit('onPushNewTask'+_id,res.status,res.concpet,res.observations,res.date) 
           }
-          
       })
       .catch(e => console.log(e))
       
@@ -76,16 +75,24 @@ const CheckBoxRender = (props) => {
     let [toogleMarker,setToogleMarker] = useState(parseInt(props.state))
     return(
         <View
-                 style = {[{flexDirection:'row',alignItems:'center',justifyContent:'center',borderRadius:10,width:'80%',height:30,marginVertical:5},toogleMarker ? {backgroundColor:'#0564B3'} : {backgroundColor:'#000'}]}
+                 style = {[{flexDirection:'row',alignItems:'center',justifyContent:'center',borderRadius:10,width:'90%',marginVertical:5,
+                            
+                },toogleMarker ? {backgroundColor:'#0564B3'} : {backgroundColor:'#000'}]}
          >
+             <View
+             style = {{width:'80%'}}
+             >
                 <Text
                  style={{
                      color:'white',
                      fontWeight:'bold',
-                     fontSize:16
+                     fontSize:16,
+                     marginLeft:6,
+                     marginVertical:5
                  }
                  }
                 >{props.Name}</Text>
+                </View>
                 <CheckBox
                  onClick={()=>{
                     var sendMarker = 0
@@ -110,10 +117,10 @@ const CheckBoxRender = (props) => {
 }
 
 
-const APISendTaskHistory = (_id,numOrder)=>{
+const APISendTaskHistory = (_id,numOrder,DepartedDate)=>{
     fetch(APIdata.URI+'/stateChange',{
         method:'PUT',
-        body:JSON.stringify({_id:_id}),
+        body:JSON.stringify({_id:_id,DepartedDate:DepartedDate}),
         headers:{
             'Content-Type' : 'application/json'
         }
@@ -149,11 +156,15 @@ const ExpanCard = (props) =>{
         <View
          style={{width:'100%',alignItems:'center'}}
         >
-        <View>
+        <View
+         style={{width:'100%',alignItems:'center'}}
+        >
             <Text
              style = {styles.TitleProps}
             >Concepto</Text>
-            <Text>{props.concept}</Text>
+        </View>
+        <View>
+        <Text>{props.concept}</Text>
         </View>
         <Text
          style = {styles.TitleProps}
@@ -179,18 +190,22 @@ const ExpanCard = (props) =>{
              style = {styles.TitleProps}
             >Fecha de entrega</Text>
             <View
-             style = {[{width:'85%',height:35,alignItems:'center',justifyContent:'center',borderRadius:10},props.dateAlert ? {backgroundColor:'#D31812'} : {backgroundColor:'#23D312'}]}
+             style = {[{width:'85%',height:35,alignItems:'center',justifyContent:'center',borderRadius:10},{backgroundColor:props.dateAlert}]}
             >
             <Text
              style = {{color:'white',fontWeight:'bold'}}
-            >{props.dataExpand.finishDate}</Text>
+            >{props.finishDate}</Text>
             </View>
         </View>
-        <View>
+        <View
+         style = {{width:'100%',alignItems:'center'}}
+        >
             <Text
              style = {styles.TitleProps}
             >Observaciones</Text>
-            <Text>{props.observations}</Text>
+        </View>
+        <View>
+        <Text>{props.observations}</Text>
         </View>
         <View
          style={styles.containerBtn}
@@ -200,15 +215,30 @@ const ExpanCard = (props) =>{
              onPress = {()=>{
                  Alert.alert(
                      "Terminar orden",
-                     "Desea terminar la orden",
+                     "Desea entregar la orden",
                      [{
                          text:"Cancelar",
                          style:"cancel"
                      },
                      {
-                         text:"Terminar",
+                         text:"Entregar",
                          onPress:()=>{
-                             APISendTaskHistory(props.dataExpand._id,props.dataExpand.numOrder)
+                            const date = new Date()
+                            var month = parseInt(date.getMonth())+1
+                            var hour = date.getHours()
+                            var minutes = date.getMinutes()
+                            if(month<10){
+                                month = '0'+month; 
+                            }
+                            if(minutes < 10){
+                                minutes = '0'+minutes
+                            }
+                            if(hour < 10){
+                                hour = '0'+hour
+                            }
+                            const today = date.getFullYear()+'-'+month+'-'+ date.getDate()+' '+hour+':'+minutes
+
+                             APISendTaskHistory(props.dataExpand._id,props.dataExpand.numOrder,today)
                          }
                      }
                     ]
@@ -226,7 +256,7 @@ const ExpanCard = (props) =>{
     )
 }
 
-const AlertDate = ()=>{
+const AlertDate = (props)=>{
     return(
         <View
          style={{
@@ -236,7 +266,7 @@ const AlertDate = ()=>{
          }}
         >
             <Image
-             source = {require('../Images/alerta.png')}
+             source = {props.img}
              style = {{width:35,height:35}}
             />
         </View>
@@ -272,7 +302,7 @@ const CardTask = (props)=>{
                   }).then(res => res.json())
                   .then(res => {
                       if(res === 'ok'){
-                          writeAPINotifiactionsTask(props.dataTask.numOrder,3)
+                          EventEmmiter.emit('onDeleteTaskNotifications',props.dataTask.numOrder)
                           Socket.emit('onDeleteTask',{name:props.userCred.name,number:props.dataTask.numOrder})
                       }
                   })
@@ -284,8 +314,8 @@ const CardTask = (props)=>{
             )
         })
         colorDate = false
-        const dataFinish = props.dataTask.finishDate
-        const concated = dataFinish.split('-')
+        var dataFinish = props.dataTask.finishDate
+        var concated = dataFinish.split('-')
         var concatDates = ''
         concated.map((values)=>{
             concatDates += values
@@ -305,10 +335,19 @@ const CardTask = (props)=>{
         const dateActually = dateyear + dateMonth + dateDay
         
         if(parseInt(dateActually)>parseInt(concatDates)){
-            colorDate = true
-            setViewAlert(<AlertDate/>)
-        }else{
-            colorDate = false
+            colorDate = '#D31812' 
+            setViewAlert(<AlertDate
+             img = {require('../Images/alerta.png')}
+            />)
+        }
+        else if(parseInt(dateActually)===parseInt(concatDates)){
+            colorDate = '#F6E920'
+            setViewAlert(<AlertDate
+             img = {require('../Images/error.png')}
+            />)
+        }
+        else{
+            colorDate = '#23D312'
             setViewAlert()
         }
 
@@ -328,7 +367,7 @@ const CardTask = (props)=>{
             setBtnSecond()
         })
 
-        EventEmmiter.on('onPushNewTask'+props.dataTask._id,(data,concept,observations)=>{
+        EventEmmiter.on('onPushNewTask'+props.dataTask._id,(data,concept,observations,date)=>{
         var dateyear =  dateNow.getFullYear().toString()
         var dateMonth =  (dateNow.getMonth()+1).toString()
         var dateDay =  (dateNow.getDate()).toString()
@@ -339,11 +378,29 @@ const CardTask = (props)=>{
             dateDay = '0'+dateDay
         }
         const dateActually = dateyear + dateMonth + dateDay
+        colorDate = false
+        dataFinish = date
+        concated = dataFinish.split('-')
+        concatDates = ''
+        concated.map((values)=>{
+            concatDates += values
+        })
         
         if(parseInt(dateActually)>parseInt(concatDates)){
-            colorDate = true
-        }else{
-            colorDate = false
+            colorDate = '#D31812' 
+            setViewAlert(<AlertDate
+             img = {require('../Images/alerta.png')}
+            />)
+        }
+        else if(parseInt(dateActually)===parseInt(concatDates)){
+            colorDate = '#F6E920'
+            setViewAlert(<AlertDate
+             img = {require('../Images/error.png')}
+            />)
+        }
+        else{
+            colorDate = '#23D312'
+            setViewAlert()
         }
 
         console.log(props.dataTask.concept)
@@ -354,6 +411,7 @@ const CardTask = (props)=>{
             dateAlert = {colorDate}
             concept = {concept}
             observations = {observations}
+            finishDate = {date}
         />)
         })
     },[])
@@ -366,12 +424,24 @@ const CardTask = (props)=>{
            <Text
             style={styles.TitleCard}
            >Orden {props.dataTask.numOrder}</Text>
+           <Text
+            style = {{
+                marginVertical:5,
+                fontWeight:'bold'
+            }}
+           >
+               Fecha de creación
+           </Text>
+           <Text>
+               {props.dataTask.createDate}
+           </Text>
            <View
-            style={{width:'100%'}}
+            style={{width:'100%',alignItems:'center'}}
            >
            <Text 
-            style={{marginHorizontal:20}}
+            style={{marginHorizontal:20,marginVertical:5}}
            >Ordenante: {props.dataTask.payer}</Text>
+
            <Text
             style={{marginHorizontal:20}}
            >Unidades: {props.dataTask.uds}</Text>

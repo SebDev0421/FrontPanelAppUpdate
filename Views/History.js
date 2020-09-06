@@ -16,6 +16,7 @@ import CardHistory from '../Components/CardHistory';
 import APIdata from '../Src/APIdata';
 
 import {Notifications} from 'react-native-notifications';
+import * as Progress from 'react-native-progress';
 
 import Header from './Header';
 
@@ -34,10 +35,46 @@ const swipeEffect = () => {
 }
 
 
+const isCloseToBottom = ({layoutMeasurement, contentOffset, contentSize})=>{
+    const paddingToBottom = 10;
+    return layoutMeasurement.height + contentOffset.y >=
+      contentSize.height - paddingToBottom;
+}
+
+
+var sizeLen = 10;
+
 const History = (props) =>{
     let [dataHistory,setDataHistory] = useState([]);
-    let [roll, setRoll] = useState('')
+    let [roll, setRoll] = useState('');
+    let [chargerRound , setChargerRound] = useState()
+    let [enableReloadAPI, setEnableReloadAPI ] = useState(false)
+    const ReadAPIHistory = (size)=>{
+        fetch(APIdata.URI+'/getHistory',{
+            method:'PUT',
+            body:JSON.stringify({lenght:size}),
+            headers:{
+                'Content-Type' : 'application/json'
+            }
+        }).then(res => res.json())
+          .then((res) => {
+              setDataHistory(res.status)
+              const len = Object.keys(res.status).length;
+              if(len < size){
+                  setChargerRound()
+                  setEnableReloadAPI(false)
+              }else if(len == size && size < parseInt(res.len)){
+                setChargerRound(<Progress.CircleSnail
+                    color={['blue']}/>)
+              }
+              sizeLen  = sizeLen + 10;
+              setEnableReloadAPI(true)
+          })
+          .catch(e => console.log(e))
+    }
+
     useEffect(()=>{
+       sizeLen = 10;
        move = 0
        swipeEffect()
        const readUserdata = async()=>{
@@ -48,28 +85,11 @@ const History = (props) =>{
     }
     readUserdata()
        
-       const ReadAPIHistory = ()=>{
-           fetch(APIdata.URI+'/getHistory',{
-               method:'PUT',
-               headers:{
-                   'Content-Type' : 'application/json'
-               }
-           }).then(res => res.json())
-             .then(res => {
-                 setDataHistory(res)
-             })
-             .catch(e => console.log(e))
-       }
-
-       ReadAPIHistory()
        
-       
-       EventEmitter.on('onDeleteHistoryOrder',()=>{
-           Notifications.postLocalNotification({
-               title:'Orden eliminada del historial',
-               body:'Has eliminado la orden'
-           })
 
+       ReadAPIHistory(sizeLen);
+       
+       EventEmitter.on('onDeleteHistoryOrder',(data)=>{
            ReadAPIHistory()
        })
     },[])
@@ -82,6 +102,13 @@ const History = (props) =>{
               Title = "Historial"
             />
             <ScrollView
+             onScroll = {({nativeEvent})=>{
+                 if(isCloseToBottom(nativeEvent)){
+                     if(enableReloadAPI){
+                         ReadAPIHistory(sizeLen)
+                     }
+                 }
+             }}
              style = {styles.ScrollCards}
             >
                 <View
@@ -100,6 +127,7 @@ const History = (props) =>{
                           </View>
                       )
                   })}
+                  {chargerRound}
                 </View>
             </ScrollView>
             <TouchableOpacity

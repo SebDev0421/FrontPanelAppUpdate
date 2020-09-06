@@ -88,20 +88,45 @@ const EditOrder = (props)=>{
     let [nameUser,setNameUser] = useState('')
     
     useEffect(()=>{
-        
+        listOrders = []
         setIdUser(props.userCred._id)
         setNameUser(props.userCred.name)
-        const tasksEdit = props.orderData.process
+        const getDataTask = async ()=>{
+            await fetch(APIdata.URI+'/getdataTasks',{
+                method:'PUT',
+                body:JSON.stringify({_id:props.orderData._id}),
+                headers:{
+                    'Content-Type':'application/json'
+                }
+            }).then(res => res.json())
+             .then((res => {
+                 console.log(res)
+                 if(res.status === 73){
+                     alert('Error comprueba tu conexion')
+                     return 0
+                 }
+        
+        const orderData = res
+        const tasksEdit = orderData.process
         tasksEdit.map((data)=>{
             listOrders.push(data[0]) 
         })
         setIndexItem(tasksEdit.length)
-        setOrdenante(props.orderData.payer)
-        setNumOrder(props.orderData.numOrder)
-        setConcept(props.orderData.concept)
-        setSizeOrder(props.orderData.uds)
-        setObservations(props.orderData.observations)
-        setDateValue(props.orderData.finishDate)
+        setOrdenante(orderData.payer)
+        setNumOrder(orderData.numOrder)
+        setConcept(orderData.concept)
+        setSizeOrder(orderData.uds)
+        setObservations(orderData.observations)
+        setDateValue(orderData.finishDate)
+        }))
+        .catch((e)=>{
+            if(e) throw e
+        })
+        }
+        
+        getDataTask()
+        
+
 
     },[])
 
@@ -157,7 +182,7 @@ const EditOrder = (props)=>{
                   style={{width:'100%',alignItems:'center'}}
                  >
                  <TextInput
-                  placeholder = {'Agegar concepto *'}
+                  placeholder = {'Agregar concepto *'}
                   multiline
                   style = {styles.TextInputSecondary}
                   onChangeText = {(desc)=>{
@@ -186,6 +211,9 @@ const EditOrder = (props)=>{
                   onChangeText={(value)=>{
                       setTasks(value)
                   }}
+                  style = {{
+                      width:'85%'
+                  }}
                   value={tasks}
                   />
                   <TouchableOpacity
@@ -205,15 +233,19 @@ const EditOrder = (props)=>{
                   </TouchableOpacity>                  
                  </View>
                 <Text>Procesos agregados {indexItem}</Text>
-                 <View>
+                 <View style = {{alignItems:'center',width:'90%'}}>
                      {listOrders.map((value)=>{
                          return(
                              <View 
                              key={value.name}
-                             style={{flexDirection:"row",marginVertical:5}}>
+                             style={{flexDirection:"row",marginVertical:5,width:'100%'}}>
+                                 <View
+                                  style = {{width:'85%',alignItems:'center'}}
+                                 >
                                  <Text >{value.name}</Text>
+                                 </View>
                                  <TouchableOpacity
-                                   style={{marginHorizontal:5}}
+                                   style={{marginHorizontal:5,position:'absolute',right:5}}
                                    onPress={()=>{
                                        listOrders.splice(listOrders.indexOf(value),1)
                                        setIndexItem(listOrders.length)
@@ -242,7 +274,7 @@ const EditOrder = (props)=>{
                   style={{width:'100%',alignItems:'center'}}
                  >
                  <TextInput
-                  placeholder = {'Agegar Observacion'}
+                  placeholder = {'Agregar observación'}
                   multiline
                   style = {styles.TextInputSecondary}
                   onChangeText = {(value) => {

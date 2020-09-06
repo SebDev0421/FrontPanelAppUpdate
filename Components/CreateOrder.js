@@ -49,10 +49,10 @@ const writeAPINotifiactionsTask = async(numOrder,status)=>{
       .catch(e=>console.log(e))
 }
 
-const APInewOrder = (ordenante,numOrder,concept,uds,process,finishDate,observations,id,nameUser) =>{
+const APInewOrder = (ordenante,numOrder,concept,uds,process,finishDate,observations,id,nameUser,createDate) =>{
     fetch(APIdata.URI+'/addNewTask',{
         method:'PUT',
-        body: JSON.stringify({payer:ordenante,numOrder:numOrder,concept:concept,uds:uds,process:process,finishDate:finishDate,observations:observations,createdId:id}),
+        body: JSON.stringify({payer:ordenante,numOrder:numOrder,concept:concept,uds:uds,process:process,createDate:createDate,finishDate:finishDate,observations:observations,createdId:id}),
         headers:{
             'Content-Type': 'application/json'
         }
@@ -88,8 +88,9 @@ const CreateOrder = (props)=>{
     let [styleBtn, setStyleBtn] = useState(false)
     let [idUser, setIdUser] = useState('')
     let [nameUser,setNameUser] = useState('')
-    
+
     useEffect(()=>{
+        listOrders = []
         const readUserdata = async()=>{
             const data = await AsyncStorage.getItem('credentialsAPPfront')
             const userCred = JSON.parse(data)
@@ -142,7 +143,7 @@ const CreateOrder = (props)=>{
                 <TextInput
                  placeholder = {'No orden *'}
                  style={styles.TextInputPrimary}
-                 keyboardType={'numeric'}
+                 keyboardType={'default'}
                  onChangeText = {(value) => {
                     setNumOrder(value)
                 }}
@@ -153,7 +154,7 @@ const CreateOrder = (props)=>{
                   style={{width:'100%',alignItems:'center'}}
                  >
                  <TextInput
-                  placeholder = {'Agegar concepto *'}
+                  placeholder = {'Agregar concepto *'}
                   multiline
                   style = {styles.TextInputSecondary}
                   onChangeText = {(desc)=>{
@@ -200,15 +201,19 @@ const CreateOrder = (props)=>{
                   </TouchableOpacity>                  
                  </View>
                 <Text>Procesos agregados {indexItem}</Text>
-                 <View>
+                 <View style = {{alignItems:'center',width:'90%'}}>
                      {listOrders.map((value)=>{
                          return(
                              <View 
                              key={value.name}
-                             style={{flexDirection:"row",marginVertical:5}}>
+                             style={{flexDirection:"row",marginVertical:5,width:'100%'}}>
+                                 <View
+                                  style = {{width:'85%',alignItems:'center'}}
+                                 >
                                  <Text >{value.name}</Text>
+                                 </View>
                                  <TouchableOpacity
-                                   style={{marginHorizontal:5}}
+                                   style={{marginHorizontal:5,position:'absolute',right:5}}
                                    onPress={()=>{
                                        listOrders.splice(listOrders.indexOf(value),1)
                                        setIndexItem(listOrders.length)
@@ -237,7 +242,7 @@ const CreateOrder = (props)=>{
                   style={{width:'100%',alignItems:'center'}}
                  >
                  <TextInput
-                  placeholder = {'Agegar Observacion'}
+                  placeholder = {'Agregar observación'}
                   multiline
                   style = {styles.TextInputSecondary}
                   onChangeText = {(value) => {
@@ -270,7 +275,24 @@ const CreateOrder = (props)=>{
                                 },
                                 {
                                     text:"Si",
-                                    onPress: ()=> {APInewOrder(ordenante,numOrder,concept,sizeOrder,listOrders,dateValue,observations,idUser,nameUser)} 
+                                    onPress: ()=> {
+                                        const date = new Date()
+                                        var month = parseInt(date.getMonth())+1
+                                        var hour = date.getHours()
+                                        var minutes = date.getMinutes()
+                                        if(month<10){
+                                           month = '0'+month; 
+                                        }
+                                        if(minutes < 10){
+                                           minutes = '0'+minutes
+                                        }
+                                        if(hour < 10){
+                                           hour = '0'+hour
+                                        }
+                                        const today = date.getFullYear()+'-'+month+'-'+ date.getDate()+' '+hour+':'+minutes
+                                        
+                                        APInewOrder(ordenante,numOrder,concept,sizeOrder,listOrders,dateValue,observations,idUser,nameUser,today)
+                                    } 
                                 }
                             ],
                         )

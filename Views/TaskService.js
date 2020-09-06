@@ -1,6 +1,7 @@
-import React,{useEffect,useState} from 'react';
+import React,{useRef,useEffect,useState} from 'react';
 import{
     View,
+    AppState,
     ScrollView,
     TouchableOpacity,
     Animated,
@@ -27,31 +28,17 @@ import Socket from '../Src/SocketListener';
 import {Notifications} from 'react-native-notifications';
 
 var idReadParse
-
-
-Notifications.registerRemoteNotifications();
-
-/* Notifications.events().registerRemoteNotificationsRegistered((event: Registered) => {
-        // TODO: Send the token to my server so it could send back push notifications...
-        console.log("Device Token Received", event.deviceToken);
-        Socket.emit('onNewTokenDevice', event.deviceToken)
-});
-Notifications.events().registerRemoteNotificationsRegistrationFailed((event: RegistrationError) => {
-        console.error(event);
-});
-
-Notifications.events().registerNotificationReceivedBackground((notification: Notification, completion: (response: NotificationCompletion) => void) => {
-        console.log("Notification Received - Background", notification.payload);
-    
-        // Calling completion on iOS with `alert: true` will present the native iOS inApp notification.
-        completion({alert: true, sound: true, badge: false});
-}); */
-
+var count_notifications = 0;
 const NotificationLocal = (title,body)=>{
+    
+    console.log('notification pass',count_notifications);
+    if(count_notifications < 1){
     Notifications.postLocalNotification({
       title:title,
       body:body          
     })
+    }
+    count_notifications ++;
 }
 
 const abortController = new AbortController()
@@ -80,7 +67,6 @@ const IndicatorTask = (props)=>{
         </View>
     )
 }
-
 var vectorRead = []
 var numberNotifi = 0
 
@@ -93,10 +79,12 @@ const TaskService = () => {
     let [viewFloatingButton, setViewFloatingButton] = useState()
     let [btnCloseEdit, setBtnCloseEdit] = useState()
     let [historyView,setHistoryView] = useState()
+    let [numbersNot,setNumbewNot] = useState(0)
     let [sizeTasks, setSizeTasks] = useState()
     let [viewListNotifications, setViewListNotifiactions] = useState()
     let [toogleList, setToogleList] = useState(false)
     let [taskNotifiNum, setTaskNotifiNum] = useState(0)
+    let [tokenDevice, setTokenDevice] = useState('')
 
     const writeNumberNotifications = async(value)=>{
         try{
@@ -106,19 +94,31 @@ const TaskService = () => {
         }
     }
 
-    const readNumbreNotifications = async(value)=> {
+    const addForeground = async ()=>{
+        const numNotViews = await AsyncStorage.getItem('numNotificationsView');
+        var newData = parseInt(numNotViews) 
+        newData = newData + 1
+        console.log('add data',newData)
+        try{
+            await AsyncStorage.setItem('numNotificationsView',newData.toString())
+            setNumbewNot(newData.toString())
+        }catch(e){
+            console.log(e)
+        }
+    }
+
+    const readNumbreNotifications = async()=> {
         const numNotViews = await AsyncStorage.getItem('numNotificationsView');
         
         if(numNotViews === null){
-            numberNotifi = value
+            setNumbewNot('0')
         }else{
-            numberNotifi = value - parseInt(numNotViews)
-            setSizeTasks(<IndicatorTask
-                numTasks = {numberNotifi}
-            />)
-            console.log(numberNotifi)
+            setNumbewNot(numNotViews)
         }
     }
+
+    readNumbreNotifications()
+    
 
     const refreshTasks = () =>{
         const readAPITask = async()=>{
@@ -150,22 +150,26 @@ const TaskService = () => {
                   
               })
               .catch(e=>console.log(e))
-                readNumbreNotifications(vectorRead.length)
+                //readNumbreNotifications(vectorRead.length)
                 setTaskNotifiNum(vectorRead.length)
         }
-
-        
-
         // read API 
         readAPITask()
         readAPINotifiactionsTask()
     }
 
+    const _handleAppStateChange = (nextAppState)=>{
+        if(nextAppState === 'active'){
+            refreshTasks()
+        }
+    }
+
+
     useEffect(()=>{
 
         
         abortController.abort()
-        
+
         const readAPITask = async()=>{
             await fetch(APIdata.URI+'/readTasks',{
                 method:'PUT',
@@ -183,6 +187,10 @@ const TaskService = () => {
         }
 
 
+        AppState.addEventListener('change',
+         _handleAppStateChange
+        )
+
         const readAPINotifiactionsTask = async()=>{
             await fetch(APIdata.URI+'/NotificationsRead',{
                 method:'PUT',
@@ -197,11 +205,103 @@ const TaskService = () => {
                   
               })
               .catch(e=>console.log(e))
-                readNumbreNotifications(vectorRead.length)
+                //readNumbreNotifications(vectorRead.length)
                 setTaskNotifiNum(vectorRead.length)
         }
 
+
+        Notifications.registerRemoteNotifications();
+
+Notifications.events().registerRemoteNotificationsRegistered((event: Registered) => {
+        // TODO: Send the token to my server so it could send back push notifications...
+        const getToken = event.deviceToken
         
+        const APIToken = (token)=>{
+            fetch(APIdata.URI+'/addToken',{
+                method:'PUT',
+                body:JSON.stringify({TokenDevice:token}),
+                headers:{
+                    'Content-Type':'application/json'
+                }
+            }).then(res => res.json())
+              .then((res)=>{
+                  if(res.status === 200){
+                     return true
+                  }
+
+              })
+              .catch((e)=>{
+                  if(e) throw e
+              })
+        }
+
+        const APIdeleteToken = (token)=>{
+            fetch(APIdata.URI+'/deleteToken',{
+                method:'PUT',
+                body:JSON.stringify({tokenId:token}),
+                headers:{
+                    'Content-Type':'application/json'
+                }
+            }).then(res => res.json())
+              .then(res => {
+                  if(res.status === 200){
+                      return true
+                  }
+              })
+              .catch((e)=>{
+                  if(e) throw e
+              })
+        }
+
+        const writeToken = async()=>{
+            try{
+                await AsyncStorage.setItem('tokenDevice',getToken)
+            }catch(e){
+                if(e) throw e
+            }
+        }
+
+        const readToken = async()=>{
+            const tokenStorage = await AsyncStorage.getItem('tokenDevice');
+            if(tokenStorage !== getToken){
+                console.log('delete in api token storage and write token',getToken);
+                APIdeleteToken(tokenStorage)
+                APIToken(getToken)
+                writeToken()
+            }else{
+                APIToken(getToken)
+                console.log('the token is equals')
+                console.log(getToken)
+            }
+        }   
+
+        readToken()
+        
+});
+Notifications.events().registerRemoteNotificationsRegistrationFailed((event: RegistrationError) => {
+        console.error(event);
+});
+
+Notifications.events().registerNotificationReceivedForeground((notification: Notification, completion: (response: NotificationCompletion) => void) => {
+    const ReceivedPayload = notification.payload;
+    addForeground();
+    readAPITask();
+    readAPINotifiactionsTask();
+    console.log('Notification detect')
+    EventEmmiter.emit('onNotification',ReceivedPayload);
+    // Calling completion on iOS with `alert: true` will present the native iOS inApp notification.
+    //completion({alert: true, sound: true, badge: false});
+    });
+
+Notifications.events().registerNotificationReceivedBackground((notification: Notification, completion: (response: NotificationCompletion) => void) => {
+        console.log("Notification Received - Background", notification.payload);
+        // Calling completion on iOS with `alert: true` will present the native iOS inApp notification.
+        readAPINotifiactionsTask()
+        readAPITask()
+        addForeground()
+        completion({alert: true, sound: true, badge: false});
+});
+
 
         // read API 
         readAPITask()
@@ -219,6 +319,9 @@ const TaskService = () => {
             }else if (idReadParse.roll === '2'){
                 setViewFloatingButton(<FloatingBtnOper/>)
             }
+            
+            
+            
         }
 
         readAsync()
@@ -227,22 +330,15 @@ const TaskService = () => {
             console.log(data)
             //generate Notification
             readAPINotifiactionsTask()
-            NotificationLocal('Se ha creado una Orden','La orden '+data.numOrder+' ha sido creada')
+            //NotificationLocal('Se ha creado una Orden','La orden '+data.numOrder+' ha sido creada')
             readAPITask()
         })
 
-        Socket.on('onDatesDeleteOrder',(data)=>{
-            console.log(data)
-            //generate Notification
-            NotificationLocal('Se ha eliminado una orden','La orden '+data.numOrder+' ha sido eliminada')
-            readAPINotifiactionsTask()
-            readAPITask()
-        })
 
         Socket.on('onDatesEditOrder',(data)=>{
             console.log(data)
             //generate Notifications
-            NotificationLocal('Se ha modificado una Orden','La orden '+data.numOrder+' ha sido modificada')
+            //NotificationLocal('Se ha modificado una Orden','La orden '+data.numOrder+' ha sido modificada')
             readAPINotifiactionsTask()
             readAPITask()
         })
@@ -250,7 +346,7 @@ const TaskService = () => {
         Socket.on('onDatesCompleteOrder',(data)=>{
             console.log(data)
             //generate Notification
-            NotificationLocal('Orden completada','La orden '+data.numOrder+' ha sido entregada y finalizada')
+            //NotificationLocal('Orden completada','La orden '+data.numOrder+' ha sido entregada y finalizada')
             readAPINotifiactionsTask()
             readAPITask()
         })
@@ -263,6 +359,11 @@ const TaskService = () => {
             setCreateOderView(<CreateOrder
              userCred = {userCredentials}
             />)
+        })
+
+        EventEmmiter.on('onNotification',(ReceivedPayload)=>{
+            count_notifications = 0;
+            NotificationLocal(ReceivedPayload["gcm.notification.title"],ReceivedPayload["gcm.notification.body"])
         })
 
         EventEmmiter.on('onCloseMenu',()=>{
@@ -302,7 +403,20 @@ const TaskService = () => {
              UserCred = {userCredentials}
             />)
         })
+
+        EventEmmiter.on('onDeleteTaskNotifications',(data)=>{
+            count_notifications = 0;
+            NotificationLocal('Has eliminado una orden','Has eliminado la orden ' +data)
+            readAPITask();
+        })
+
+        
+        EventEmmiter.on('onDeleteHistoryOrder',(data)=>{
+            count_notifications = 0;
+            NotificationLocal('Orden eliminada del historial','Has eliminado la orden ' +data)
+        })
     },[])
+
        return(
            <View style = {styles.container}>
             <Header
@@ -335,7 +449,7 @@ const TaskService = () => {
                  style={{color:'white'}}
                 > Actualizar tareas</Text>
             </TouchableOpacity>
-            {actuallyTasks.map((data)=>{
+            {actuallyTasks.slice(0).reverse().map((data)=>{
                 return(
                     <View
                     style = {{width:'100%',alignItems:'center'}}
@@ -377,8 +491,8 @@ const TaskService = () => {
                     setViewListNotifiactions(<ListNotification
                      notifi = {notificationsAPI}
                     />)
-                    writeNumberNotifications(taskNotifiNum.toString())
-                    readNumbreNotifications(notificationsAPI.length)
+                    writeNumberNotifications('0')
+                    setNumbewNot('0')
                     setToogleList(true)
                  }
              }}
@@ -387,7 +501,9 @@ const TaskService = () => {
                  source = {require('../Images/notificacion.png')}
                  style = {{width:30,height:30}}
                 />
-                {sizeTasks}
+                <IndicatorTask
+                numTasks = {numbersNot}
+                />
             </TouchableOpacity>
             {viewListNotifications}
             {menuView}

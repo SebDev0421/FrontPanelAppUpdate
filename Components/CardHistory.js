@@ -40,7 +40,9 @@ const ExpandView = (props)=>{
         <View
          style={{width:'100%', alignItems:'center'}}
         >
-            <View>
+            <View
+             style = {{alignItems:'center',width:'90%'}}
+            >
                 <Text
                  style = {styles.TitleProps}
                 >
@@ -48,6 +50,9 @@ const ExpandView = (props)=>{
                 </Text>
                 <Text>{props.dataExpand.concept}</Text>
             </View>
+            <View
+             style = {{alignItems:'center',width:'70%'}}
+            >
             <Text
              style = {styles.TitleProps}
             >Procesos</Text>
@@ -62,23 +67,30 @@ const ExpandView = (props)=>{
                     )
                 })
             }
-            <View>
+            </View>
+            <View
+             style = {{alignItems:'center',width:'70%'}}
+            >
             <Text
              style = {styles.TitleProps}
             >Fecha de entrega</Text>
              <Text>{props.dataExpand.finishDate}</Text>
             </View>
-            <View>
+            <View
+             style = {{alignItems:'center',width:'70%'}}
+            >
              <Text
               style = {styles.TitleProps}
              >Observaciones</Text>
-             <Text>{props.dataExpand.observations}</Text>
+             <Text
+              style = {{marginVertical:5}}
+             >{props.dataExpand.observations}</Text>
              </View>
             </View>
     )
 }
 
-const APIDeleteTask = (_id)=>{
+const APIDeleteTask = (_id,numOrder)=>{
     fetch(APIdata.URI+'/deleteTaskHistory',{
         method: 'PUT',
         body:JSON.stringify({_id:_id}),
@@ -88,8 +100,8 @@ const APIDeleteTask = (_id)=>{
     }).then(res => res.json())
       .then(res =>  {
           if(res.status === 37){
-              EventEmitter.emit('onDeleteHistoryOrder',true)
-              Alert.alert('Orden eliminada del historial','La orden a sido eliminada')
+              EventEmitter.emit('onDeleteHistoryOrder',numOrder)
+              Alert.alert('Orden eliminada del historial','La orden '+ numOrder +' ha sido eliminada')
           }
       })
 }
@@ -110,7 +122,8 @@ const CardHistory = (props) => {
                 {
                     text:'Confirmar',
                     onPress:()=>{
-                        APIDeleteTask(props.dataCard._id)
+                        
+                        APIDeleteTask(props.dataCard._id,props.dataCard.numOrder)
                     }
                 }
             ]
@@ -133,9 +146,43 @@ const CardHistory = (props) => {
         <View
          style = {styles.container}
         >
+        <View
+         style = {{
+             width:'100%',
+             alignItems:'flex-start'
+         }}
+        >
+            <View
+             style = {{
+                 width:'75%',
+                 alignItems:'center'
+             }}
+            >
             <Text
              style = {styles.TitleCard}
             >Orden {props.dataCard.numOrder}</Text>
+            </View>
+            </View>
+            <Text
+             style = {{
+                 fontWeight:'bold'
+             }}
+            >
+                Fecha de creación
+            </Text>
+            <Text
+             style={styles.subText}
+            >{props.dataCard.createDate}</Text>
+            <Text
+             style = {{
+                 fontWeight:'bold'
+             }}
+            >
+                Fecha de entrega
+            </Text>
+            <Text
+             style={styles.subText}
+            >{props.dataCard.DepartedDate}</Text>
             <Text
              style={styles.subText}
             >Ordenante: {props.dataCard.payer}</Text>

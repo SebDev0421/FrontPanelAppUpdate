@@ -53,7 +53,7 @@ const AboutUs = () => {
                 <Text
                  style={styles.TextBtn}
                 >
-                    Tienes Alguna sugerencia?
+                    Tienes alguna sugerencia?
                 </Text>
             </TouchableOpacity>
             </View>
