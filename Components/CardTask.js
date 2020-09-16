@@ -143,6 +143,7 @@ var index = 0
 const ExpanCard = (props) =>{
     let [taskData, setTaskData] = useState([])
     let [taskPush,setTaskPush] = useState([])
+    let [dateEndNewFormat, setDateEndNewFormat] = useState('')
     useEffect(()=>{
         AuxTasks = []
         props.task.map((value)=>{
@@ -150,7 +151,16 @@ const ExpanCard = (props) =>{
         }) 
        index = 0
        setTaskData(AuxTasks)
-       //(props.dateAlert)
+
+       const DateEnd= props.finishDate
+       const spliterDateEnd = DateEnd.split('-')
+       console.log(spliterDateEnd)
+       const dayEnd = spliterDateEnd[2]
+       const MonthEnd = spliterDateEnd[1]
+       const yearEnd = spliterDateEnd[0]
+       
+       setDateEndNewFormat(dayEnd+'-'+MonthEnd+'-'+yearEnd)
+       
     },[])
     return(
         <View
@@ -194,7 +204,7 @@ const ExpanCard = (props) =>{
             >
             <Text
              style = {{color:'white',fontWeight:'bold'}}
-            >{props.finishDate}</Text>
+            >{dateEndNewFormat}</Text>
             </View>
         </View>
         <View
@@ -227,6 +237,7 @@ const ExpanCard = (props) =>{
                             var month = parseInt(date.getMonth())+1
                             var hour = date.getHours()
                             var minutes = date.getMinutes()
+                            var day = date.getDate()
                             if(month<10){
                                 month = '0'+month; 
                             }
@@ -236,7 +247,10 @@ const ExpanCard = (props) =>{
                             if(hour < 10){
                                 hour = '0'+hour
                             }
-                            const today = date.getFullYear()+'-'+month+'-'+ date.getDate()+' '+hour+':'+minutes
+                            if(day < 10){
+                                day = '0'+day
+                            }
+                            const today = day+'-'+month+'-'+date.getFullYear() +' '+hour+':'+minutes
 
                              APISendTaskHistory(props.dataExpand._id,props.dataExpand.numOrder,today)
                          }
@@ -284,6 +298,8 @@ const CardTask = (props)=>{
     let [btnSecond,setBtnSecond] = useState()
     let [viewAlert,setViewAlert] = useState()
     let [taskPass , setTaskPass] = useState([])
+
+    let [dateNewFormat, setDateNewFormat] = useState('')
     useEffect(()=>{
         console.log(props.dataTask.concept)
         setTaskPass(props.dataTask.process)
@@ -414,6 +430,17 @@ const CardTask = (props)=>{
             finishDate = {date}
         />)
         })
+
+        const dateBeginComplete = props.dataTask.createDate
+        const SepareData = dateBeginComplete.split(' ')
+        const dateBegin = SepareData[0]
+        const hourBegin = SepareData[1]
+        
+        const dateBeginSpliter = dateBegin.split('-')
+
+        
+        setDateNewFormat(dateBeginSpliter[2]+'-'+dateBeginSpliter[1]+'-'+dateBeginSpliter[0]+' '+hourBegin)
+
     },[])
 
 
@@ -433,7 +460,7 @@ const CardTask = (props)=>{
                Fecha de creación
            </Text>
            <Text>
-               {props.dataTask.createDate}
+               {dateNewFormat}
            </Text>
            <View
             style={{width:'100%',alignItems:'center'}}

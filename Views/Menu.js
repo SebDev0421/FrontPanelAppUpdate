@@ -164,7 +164,12 @@ const Menu = (props)=>{
                             <View
                              style = {{flexDirection:'row',alignItems:'center'}}
                             >
-                            <Text>{roll}</Text>
+                            <Text
+                             style = {{
+                                 fontWeight:'bold',
+                                 textDecorationLine:'underline'
+                             }}
+                            >{roll}</Text>
                             {king}
                             </View>
                         </View>

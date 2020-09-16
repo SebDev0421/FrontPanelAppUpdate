@@ -129,7 +129,7 @@ const Login = ()=>{
                  EventEmitter.emit('onOpenRegister',true)
              }}
             >
-                <Text>Aun no tienes cuenta?</Text>
+                <Text>Aún no tienes cuenta?</Text>
             </TouchableNativeFeedback>
 
         </View>

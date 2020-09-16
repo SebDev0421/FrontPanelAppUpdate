@@ -49,9 +49,9 @@ const IndicatorTask = (props)=>{
         <View
                  style = {{
                      position:'absolute',
-                     width:20,
-                     height:20,
-                     borderRadius:20/2,
+                     width:23,
+                     height:23,
+                     borderRadius:25/2,
                      backgroundColor: 'red',
                      bottom:-5,
                      right:-5,
@@ -61,7 +61,8 @@ const IndicatorTask = (props)=>{
                 >
                     <Text
                      style = {{
-                         color:'white'
+                         color:'white',
+                         fontSize:12
                      }}
                     >{props.numTasks}</Text>
         </View>
@@ -85,6 +86,7 @@ const TaskService = () => {
     let [toogleList, setToogleList] = useState(false)
     let [taskNotifiNum, setTaskNotifiNum] = useState(0)
     let [tokenDevice, setTokenDevice] = useState('')
+    let [notiUpdate, setNotiUpdate] = useState(0)
 
     const writeNumberNotifications = async(value)=>{
         try{
@@ -110,17 +112,17 @@ const TaskService = () => {
     const readNumbreNotifications = async()=> {
         const numNotViews = await AsyncStorage.getItem('numNotificationsView');
         
-        if(numNotViews === null){
-            setNumbewNot('0')
-        }else{
-            setNumbewNot(numNotViews)
-        }
+       
     }
 
     readNumbreNotifications()
     
 
-    const refreshTasks = () =>{
+    const refreshTasks = async() =>{
+
+        var lenListNot = 0
+        var lenUserView  = 0
+
         const readAPITask = async()=>{
             await fetch(APIdata.URI+'/readTasks',{
                 method:'PUT',
@@ -147,15 +149,80 @@ const TaskService = () => {
               .then((res) => {
                   setNotificationsAPI(res)
                   vectorRead = res
-                  
               })
               .catch(e=>console.log(e))
-                //readNumbreNotifications(vectorRead.length)
-                setTaskNotifiNum(vectorRead.length)
+                
         }
-        // read API 
+
+
+
+        const readlenNotificationAPI = async()=>{
+            await fetch(APIdata.URI+'/lenNotifications',{
+                method:'PUT',
+                headers:{
+                    'Content-Type': 'application/json'
+                }
+            }).then(res => res.json())
+              .then((res) => {
+                lenListNot = res.size
+                setNotiUpdate(lenListNot)
+              })
+              .catch(e=>console.log(e))
+                
+        }
+
+        const idRead = await AsyncStorage.getItem('credentialsAPPfront');
+        const idReadParse = JSON.parse(idRead)
+
+        const readlenNotificationUserAPI = async()=>{
+            await fetch(APIdata.URI+'/readNotificationUser',{
+                method:'PUT',
+                body:JSON.stringify({_id:idReadParse._id}),
+                headers:{
+                    'Content-Type': 'application/json'
+                }
+            }).then(res => res.json())
+              .then((res) => {
+                lenUserView = res.sizeUser
+              })
+              .catch(e=>console.log(e))
+        }
+
+
+        await readlenNotificationAPI()
+        await readlenNotificationUserAPI()
+
+        if((lenListNot-lenUserView) > 99){
+            setNumbewNot('+99')
+        }
+        else{
+            setNumbewNot(lenListNot-lenUserView)
+        }
+
         readAPITask()
         readAPINotifiactionsTask()
+
+    }
+
+    const updateNotiCount = async (lenList)=>{
+        const idRead = await AsyncStorage.getItem('credentialsAPPfront');
+        const idReadParse = JSON.parse(idRead)
+
+        const writelenNotificationUserAPI = async()=>{
+            await fetch(APIdata.URI+'/writeNotificationUser',{
+                method:'PUT',
+                body:JSON.stringify({_id:idReadParse._id,nRead:lenList}),
+                headers:{
+                    'Content-Type': 'application/json'
+                }
+            }).then(res => res.json())
+              .then((res) => {
+                return true
+              })
+              .catch(e=>console.log(e))
+        }
+
+        writelenNotificationUserAPI()
     }
 
     const _handleAppStateChange = (nextAppState)=>{
@@ -284,7 +351,7 @@ Notifications.events().registerRemoteNotificationsRegistrationFailed((event: Reg
 
 Notifications.events().registerNotificationReceivedForeground((notification: Notification, completion: (response: NotificationCompletion) => void) => {
     const ReceivedPayload = notification.payload;
-    addForeground();
+    //addForeground();
     readAPITask();
     readAPINotifiactionsTask();
     console.log('Notification detect')
@@ -296,16 +363,15 @@ Notifications.events().registerNotificationReceivedForeground((notification: Not
 Notifications.events().registerNotificationReceivedBackground((notification: Notification, completion: (response: NotificationCompletion) => void) => {
         console.log("Notification Received - Background", notification.payload);
         // Calling completion on iOS with `alert: true` will present the native iOS inApp notification.
-        readAPINotifiactionsTask()
-        readAPITask()
-        addForeground()
+        //readAPINotifiactionsTask()
+        //readAPITask()
+        //addForeground()
         completion({alert: true, sound: true, badge: false});
 });
 
 
         // read API 
-        readAPITask()
-        readAPINotifiactionsTask()
+        refreshTasks();
 
 
         const readAsync = async()=>{
@@ -491,8 +557,9 @@ Notifications.events().registerNotificationReceivedBackground((notification: Not
                     setViewListNotifiactions(<ListNotification
                      notifi = {notificationsAPI}
                     />)
-                    writeNumberNotifications('0')
+                    //writeNumberNotifications('0')
                     setNumbewNot('0')
+                    updateNotiCount(notiUpdate.toString())
                     setToogleList(true)
                  }
              }}
