@@ -18,7 +18,9 @@ import {
   TextInput,
   YellowBox,
   LogBox,
-  AsyncStorage
+  AsyncStorage,
+  Platform,
+  Dimensions
 } from 'react-native';
 
 import {
@@ -32,7 +34,7 @@ import {
 import EventEmitter from 'react-native-eventemitter';
 
 
-import Login from './Views/Login';
+import Login from './Views/Login'
 import Register from './Views/Register';
 import Entry from './Views/Entry';
 import TaskService from './Views/TaskService';
@@ -41,6 +43,12 @@ import RecoveryPassword from './Views/RecoveryPassword';
 
 
 LogBox.ignoreAllLogs(true)
+
+
+const d = Dimensions.get("window")
+const isX = Platform.OS === "ios" && (d.height > 800 || d.width > 800) ? true : false
+
+console.log(isX)
 
 
 
@@ -100,12 +108,12 @@ const App: () => React$Node = () => {
   return (
     <>
       <SafeAreaView
-       style={{width:'100%',height:'100%'}}
+       style={[{width:'100%',height:'100%'},isX ? {position:'absolute',top:38} : {position:'absolute',top:0}]}
       >
       <StatusBar
        backgroundColor={'#0564B3'}
       />
-        <ScrollView
+      <ScrollView
           contentInsetAdjustmentBehavior="automatic"
           style={styles.scrollView}>
             {viewLogin}
@@ -127,7 +135,7 @@ const styles = StyleSheet.create({
   },
   engine: {
     position: 'absolute',
-    right: 0,
+    right: 0
   },
   body: {
     backgroundColor: Colors.white,
