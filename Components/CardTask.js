@@ -465,13 +465,25 @@ const CardTask = (props)=>{
            <View
             style={{width:'100%',alignItems:'center'}}
            >
+           <View
+            style={{marginHorizontal:20,marginVertical:5,flexDirection:'row'}}
+           >
            <Text 
-            style={{marginHorizontal:20,marginVertical:5}}
-           >Ordenante: {props.dataTask.payer}</Text>
-
+            style={{fontWeight:'bold'}}
+           >Ordenante:</Text>
+           <Text>{props.dataTask.payer}</Text>
+           </View>
+           <View
+              style={{marginHorizontal:20,marginVertical:5,flexDirection:'row'}}
+           >
            <Text
-            style={{marginHorizontal:20}}
-           >Unidades: {props.dataTask.uds}</Text>
+            style={{fontWeight:'bold'}}
+           >Unidades:</Text>
+           <Text>
+           {props.dataTask.uds}
+           </Text>
+           </View>
+           
            </View>
            {expandView}           
            <View

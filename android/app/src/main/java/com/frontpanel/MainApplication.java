@@ -1,4 +1,4 @@
-package com.frontpanel;
+package com.frontpanelupdate;
 
 import android.app.Application;
 import android.content.Context;

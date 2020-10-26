@@ -36,6 +36,17 @@ const CheckBoxRender = (props)=>{
     )
 }
 const ExpandView = (props)=>{
+    let [datEndNewFormat,setDateEndNewFormat] = useState('')
+    useEffect(()=>{
+       const DateEnd= props.dataExpand.finishDate
+       const spliterDateEnd = DateEnd.split('-')
+       
+       const dayEnd = spliterDateEnd[2]
+       const MonthEnd = spliterDateEnd[1]
+       const yearEnd = spliterDateEnd[0]
+       
+       setDateEndNewFormat(dayEnd+'-'+MonthEnd+'-'+yearEnd)
+    })
     return(
         <View
          style={{width:'100%', alignItems:'center'}}
@@ -74,7 +85,7 @@ const ExpandView = (props)=>{
             <Text
              style = {styles.TitleProps}
             >Fecha de entrega</Text>
-             <Text>{props.dataExpand.finishDate}</Text>
+             <Text>{datEndNewFormat}</Text>
             </View>
             <View
              style = {{alignItems:'center',width:'70%'}}
@@ -110,6 +121,7 @@ const CardHistory = (props) => {
     let [boolExpand,setBoolExpand] = useState(false)
     let [arrowChange, setArrowChange] = useState(<Image source = {require('../Images/arrowdown.png')} style={{width:30,height:30}}/>)
     let [expandView,setExpandView] = useState()
+    let [dateNewFormat, setDateNewFormat] = useState('')
     let [btnEliminate, setBtnEliminate] = useState(<TouchableOpacity
         style = {{position:'absolute',top:12,right:60}}
         onPress={()=>{
@@ -136,6 +148,17 @@ const CardHistory = (props) => {
            />
        </TouchableOpacity>)
     useEffect(()=>{
+
+
+        const dateBeginComplete = props.dataCard.createDate
+        const SepareData = dateBeginComplete.split(' ')
+        const dateBegin = SepareData[0]
+        const hourBegin = SepareData[1]
+        
+        const dateBeginSpliter = dateBegin.split('-')
+
+        
+        setDateNewFormat(dateBeginSpliter[2]+'-'+dateBeginSpliter[1]+'-'+dateBeginSpliter[0]+' '+hourBegin)
 
         if(props.roll === '2'){
             setBtnEliminate()
@@ -172,7 +195,7 @@ const CardHistory = (props) => {
             </Text>
             <Text
              style={styles.subText}
-            >{props.dataCard.createDate}</Text>
+            >{dateNewFormat}</Text>
             <Text
              style = {{
                  fontWeight:'bold'
@@ -183,12 +206,24 @@ const CardHistory = (props) => {
             <Text
              style={styles.subText}
             >{props.dataCard.DepartedDate}</Text>
-            <Text
-             style={styles.subText}
-            >Ordenante: {props.dataCard.payer}</Text>
-            <Text
-             style={styles.subText}
-            >Unidades: {props.dataCard.uds}</Text>
+            <View
+            style={{marginHorizontal:20,marginVertical:5,flexDirection:'row'}}
+           >
+           <Text 
+            style={{fontWeight:'bold'}}
+           >Ordenante:</Text>
+           <Text>{props.dataCard.payer}</Text>
+           </View>
+           <View
+              style={{marginHorizontal:20,marginVertical:5,flexDirection:'row'}}
+           >
+           <Text
+            style={{fontWeight:'bold'}}
+           >Unidades:</Text>
+           <Text>
+           {props.dataCard.uds}
+           </Text>
+           </View>
             {expandView}
             {btnEliminate}
             <TouchableOpacity

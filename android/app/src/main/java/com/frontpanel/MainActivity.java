@@ -1,4 +1,4 @@
-package com.frontpanel;
+package com.frontpanelupdate;
 
 import com.facebook.react.ReactActivity;
 

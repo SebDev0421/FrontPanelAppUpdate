@@ -17,9 +17,7 @@ import{
 
 import APIdata from '../Src/APIdata'
 import Socket from '../Src/SocketListener';
-
 import DatePicker from 'react-native-datepicker';
-
 import EventEmitter from 'react-native-eventemitter';
 
 const isCloseToBottom = ({layoutMeasurement, contentOffset, contentSize}) => {
@@ -47,6 +45,44 @@ const writeAPINotifiactionsTask = async(numOrder,status)=>{
           
       })
       .catch(e=>console.log(e))
+}
+
+const APIConsultTaskList = async(numOrder) => {
+    let serverConsult
+    fetch(APIdata.URI + '/devNewTasks',{
+        method:'PUT',
+        body:JSON.stringify({numOrder:numOrder}),
+        headers:{
+            'Content-Type' : 'application/json'
+        }
+    }).then(res => res.json())
+      .then((res=>{
+        return res.status
+      }))
+      .catch(err => {
+          console.log(err)
+      })
+      
+}
+
+const APIConsultHistoryList = async (numOrder) => {
+
+    let serverConsult 
+
+    await fetch(APIdata.URI + '/devNewHistory',{
+        method:'PUT',
+        body:JSON.stringify({numOrder:numOrder}),
+        headers:{
+            'Content-Type' : 'application/json'
+        }
+    }).then(res => res.json())
+      .then((res=>{
+         return res.status
+      }))
+      .catch(err => {
+          if(err) throw err
+      })
+
 }
 
 const APInewOrder = (ordenante,numOrder,concept,uds,process,finishDate,observations,id,nameUser,createDate) =>{
@@ -255,7 +291,7 @@ const CreateOrder = (props)=>{
                 </ScrollView>
                 <TouchableOpacity
                  style={styleBtn ? styles.btnAddSecondary : styles.btnAdd }
-                 onPress = {()=>{
+                 onPress = {async()=>{
                      if(styleBtn){
                         if(dateValue == '' || ordenante == '' || numOrder == '' || concept == '' || sizeOrder == ''){
                             alert('hay campos obligatorios sin llenar')
@@ -275,7 +311,7 @@ const CreateOrder = (props)=>{
                                 },
                                 {
                                     text:"Si",
-                                    onPress: ()=> {
+                                    onPress: async ()=> {
                                         const date = new Date()
                                         var month = parseInt(date.getMonth())+1
                                         var hour = date.getHours()
@@ -290,6 +326,53 @@ const CreateOrder = (props)=>{
                                            hour = '0'+hour
                                         }
                                         const today = date.getFullYear()+'-'+month+'-'+ date.getDate()+' '+hour+':'+minutes
+
+                                        let permisionCreate
+
+                                        await fetch(APIdata.URI + '/devNewTasks',{
+                                            method:'PUT',
+                                            body:JSON.stringify({numOrder:numOrder}),
+                                            headers:{
+                                                'Content-Type' : 'application/json'
+                                            }
+                                        }).then(res => res.json())
+                                          .then((res=>{
+                                            
+                                            permisionCreate = res.status
+                            
+                                          }))
+                                          .catch(err => {
+                                              console.log(err)
+                                          })
+
+                                        console.log(permisionCreate)
+
+                                        if(permisionCreate === 75){
+                                            alert('Este numero de orden ya existe')
+                                            return 0
+                                        }
+                                        
+
+                                        await fetch(APIdata.URI + '/devNewHistory',{
+                                            method:'PUT',
+                                            body:JSON.stringify({numOrder:numOrder}),
+                                            headers:{
+                                                'Content-Type' : 'application/json'
+                                            }
+                                        }).then(res => res.json())
+                                          .then((res=>{
+                                             permisionCreate = res.status
+                                          }))
+                                          .catch(err => {
+                                              if(err) throw err
+                                          })
+
+                                        console.log(permisionCreate)
+
+                                        if(permisionCreate === 75){
+                                            alert('Este numero de orden ya existe')
+                                            return 0
+                                        }
                                         
                                         APInewOrder(ordenante,numOrder,concept,sizeOrder,listOrders,dateValue,observations,idUser,nameUser,today)
                                     } 
