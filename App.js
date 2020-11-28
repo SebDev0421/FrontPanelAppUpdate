@@ -46,9 +46,10 @@ LogBox.ignoreAllLogs(true)
 
 
 const d = Dimensions.get("window")
-const isX = Platform.OS === "ios" && (d.height > 800 || d.width > 800) ? true : false
+const isX = Platform.OS === "ios" && (d.height > 1000) ? true : false
 
-console.log(isX)
+const is7 = Platform.OS === "ios" && (d.height > 600) ? true : false
+
 
 
 
@@ -108,7 +109,7 @@ const App: () => React$Node = () => {
   return (
     <>
       <SafeAreaView
-       style={[{width:'100%',height:'100%'},isX ? {position:'absolute',top:38} : {position:'absolute',top:0}]}
+       style={[{width:'100%',height:'100%'},isX ? {position:'absolute',top:40} : {position:'absolute',top:0} , is7 ? {position:'absolute',top:15} : {position:'absolute',top:0}] }
       >
       <StatusBar
        backgroundColor={'#0564B3'}

@@ -271,6 +271,8 @@ const CreateOrder = (props)=>{
                       console.log(date)
                       setDateValue(date)
                   }}
+                  confirmBtnText = {'Aceptar'}
+                  cancelBtnText = {'Cancelar'}
                  />
                  <Text>Observaciones</Text>
                  <ScrollView style={{width:'100%'}}>

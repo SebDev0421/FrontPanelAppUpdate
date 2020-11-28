@@ -282,7 +282,7 @@ const TaskService = () => {
 Notifications.events().registerRemoteNotificationsRegistered((event: Registered) => {
         // TODO: Send the token to my server so it could send back push notifications...
         const getToken = event.deviceToken
-        
+        console.log(getToken)
         const APIToken = (token)=>{
             fetch(APIdata.URI+'/addToken',{
                 method:'PUT',

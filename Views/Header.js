@@ -2,15 +2,21 @@ import React from 'react';
 import {
     View,
     Text,
-    StyleSheet
+    StyleSheet,
+    Platform,
+    Dimensions
 } from 'react-native';
+
+
+const d = Dimensions.get("window")
+const is7 = Platform.OS === "ios" && (d.height > 600) ? true : false
 
 const Header = (props) => { 
     return(
         <View
          style={styles.container}
         >
-            <Text style={styles.TextTitle}>{props.Title}</Text>
+            <Text style={[styles.TextTitle,is7 ? {fontSize: 17} : {fontSize:20}]}>{props.Title}</Text>
         </View>
     )
 }
@@ -27,7 +33,6 @@ const styles = StyleSheet.create({
     },
     TextTitle:{
         color:'white',
-        fontSize:20,
         fontWeight:'bold'
     }
 })
